@@ -24,7 +24,9 @@ public class VoxelGrid : MonoBehaviour
                 List<Voxel> depthColumn = new List<Voxel>();
                 for (int z = 0; z < dimension; z++)
                 {
-                    voxelObject = GameObject.Instantiate(VoxelPrefab, new Vector3(x, y, z), Quaternion.identity, this.transform);
+                    voxelObject = GameObject.Instantiate(VoxelPrefab,  this.transform);
+                    voxelObject.transform.localPosition = new Vector3(x, y, z);
+                    voxelObject.transform.localRotation = Quaternion.identity;
                     voxel = voxelObject.GetComponent<Voxel>();
                     voxel.x = x;
                     voxel.y = y;

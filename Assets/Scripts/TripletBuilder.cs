@@ -17,16 +17,27 @@ public class TripletBuilder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject VoxelGridObject = GameObject.Instantiate(voxelGridPrefab, new Vector3(0, 0, 0), Quaternion.identity, this.transform);
+        GameObject VoxelGridObject = GameObject.Instantiate(voxelGridPrefab, this.transform);
+        VoxelGridObject.transform.localPosition = new Vector3(0, 0, 0);
+        VoxelGridObject.transform.localRotation = Quaternion.identity;
         voxelGrid = VoxelGridObject.GetComponent<VoxelGrid>();
 
-        GameObject topCellGridObject = GameObject.Instantiate(cellGridPrefab, new Vector3(0, dimensions + 2, 0), Quaternion.identity, this.transform);
+        //xz
+        GameObject topCellGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
+        topCellGridObject.transform.localPosition = new Vector3(0, dimensions + 2, 0);
+        topCellGridObject.transform.localRotation = Quaternion.Euler(90, 0, 0);
         topCellGrid = topCellGridObject.GetComponent<CellGrid>();
 
-        GameObject sideCellGridObject = GameObject.Instantiate(cellGridPrefab, new Vector3(dimensions + 2, 0, 0), Quaternion.identity, this.transform);
+        //zy
+        GameObject sideCellGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
+        sideCellGridObject.transform.localPosition = new Vector3(dimensions + 2, 0, 0);
+        sideCellGridObject.transform.localRotation = Quaternion.Euler(0, -90, 0);
         sideCellGrid = sideCellGridObject.GetComponent<CellGrid>();
 
-        GameObject frontCellGridGridObject = GameObject.Instantiate(cellGridPrefab, new Vector3(0, 0, dimensions + 2), Quaternion.identity, this.transform);
+        //xy
+        GameObject frontCellGridGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
+        frontCellGridGridObject.transform.localPosition = new Vector3(0, 0, -2);
+        frontCellGridGridObject.transform.localRotation = Quaternion.identity;
         frontCellGrid = frontCellGridGridObject.GetComponent<CellGrid>();
     }
 

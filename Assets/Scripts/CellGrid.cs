@@ -21,7 +21,9 @@ public class CellGrid : MonoBehaviour
             List<Cell> column = new List<Cell>();
             for (int y = 0; y < dimension; y++)
             {
-                cellObject = GameObject.Instantiate(CellPrefab, new Vector3(x, y, 0), Quaternion.identity, this.transform);
+                cellObject = GameObject.Instantiate(CellPrefab, this.transform);
+                cellObject.transform.localPosition = new Vector3(x, y, 0);
+                cellObject.transform.localRotation = Quaternion.identity;
                 cell = cellObject.GetComponent<Cell>();
                 cell.x = x;
                 cell.y = y;
