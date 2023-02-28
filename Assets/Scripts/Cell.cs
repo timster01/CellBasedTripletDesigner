@@ -19,6 +19,11 @@ public class Cell : MonoBehaviour
         currentFillValue = (FillValue)Random.Range(0, 5);
     }
 
+    public void CycleFillValue()
+    {
+        currentFillValue = (FillValue)(((int)currentFillValue + 1) % 6);
+    }
+
     // Update is called once per frame
     void Update()
     {
