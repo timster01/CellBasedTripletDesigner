@@ -7,6 +7,7 @@ public class VoxelGrid : MonoBehaviour
 
     public GameObject VoxelPrefab;
     public int dimension = 5;
+    public TripletBuilder parent;
 
     List<List<List<Voxel>>> grid;
 
@@ -31,12 +32,19 @@ public class VoxelGrid : MonoBehaviour
                     voxel.x = x;
                     voxel.y = y;
                     voxel.z = z;
+                    voxel.parent = this;
                     depthColumn.Add(voxel);
+
                 }
                 plane.Add(depthColumn);
             }
             grid.Add(plane);
         }
+    }
+
+    void UpdateVoxels()
+    {
+
     }
 
     // Update is called once per frame

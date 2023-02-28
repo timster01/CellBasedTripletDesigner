@@ -7,6 +7,7 @@ public class CellGrid : MonoBehaviour
 
     public GameObject CellPrefab;
     public int dimension = 5;
+    public TripletBuilder parent;
 
     List<List<Cell>> grid;
 
@@ -27,15 +28,21 @@ public class CellGrid : MonoBehaviour
                 cell = cellObject.GetComponent<Cell>();
                 cell.x = x;
                 cell.y = y;
+                cell.parent = this;
                 column.Add(cell);
             }
             grid.Add(column);
         }
     }
 
-    Cell GetCellAtCoords(int x, int y)
+    public Cell GetCellAtCoords(int x, int y)
     {
         return grid[x][y];
+    }
+
+    void CellUpdated()
+    {
+
     }
 
     // Update is called once per frame
