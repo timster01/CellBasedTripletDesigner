@@ -42,9 +42,27 @@ public class CellGrid : MonoBehaviour
         return grid[x][y];
     }
 
-    void CellUpdated()
+    //TODO
+    public bool IsSilhouetteConnected()
     {
+        return false;
+    }
 
+    //TODO
+    public void CellUpdated(int x, int y)
+    {
+        if(cellGridAngle == CellGridAngle.Front)
+        {
+            parent.voxelGrid.UpdateVoxelColumnZ(x, y);
+        }
+        if (cellGridAngle == CellGridAngle.Side)
+        {
+            parent.voxelGrid.UpdateVoxelColumnX(x, y);
+        }
+        if (cellGridAngle == CellGridAngle.Top)
+        {
+            parent.voxelGrid.UpdateVoxelColumnY(x, y);
+        }
     }
 
     public bool IsSilhouetteValid()

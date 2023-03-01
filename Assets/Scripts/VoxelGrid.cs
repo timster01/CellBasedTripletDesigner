@@ -42,9 +42,29 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
-    void UpdateVoxels()
-    {
 
+    public void UpdateVoxelColumnX(int z, int y)
+    {
+        for (int x = 0; x < dimension; x++)
+        {
+            grid[x][y][z].UpdateVoxel();
+        }
+    }
+
+    public void UpdateVoxelColumnY(int x, int z)
+    {
+        for (int y = 0; y < dimension; y++)
+        {
+            grid[x][y][z].UpdateVoxel();
+        }
+    }
+
+    public void UpdateVoxelColumnZ(int x, int y)
+    {
+        for (int z = 0; z < dimension; z++)
+        {
+            grid[x][y][z].UpdateVoxel();
+        }
     }
 
     public bool IsConnected()

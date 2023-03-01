@@ -15,13 +15,13 @@ public class Voxel : MonoBehaviour
         
     }
 
+
     // Update is called once per frame
     void Update()
     {
-        UpdateVoxel();
     }
 
-    void UpdateVoxel()
+    public void UpdateVoxel()
     {
         Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).currentFillValue;
         Cell.FillValue sideCellFillValue = parent.parent.sideCellGrid.GetCellAtCoords(z, y).currentFillValue;
