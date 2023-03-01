@@ -10,6 +10,7 @@ public class VoxelGrid : MonoBehaviour
     public TripletBuilder parent;
     public GameObject combinedMesh;
 
+    //TODO: replace by button
     public bool test = false;
 
     List<List<List<Voxel>>> grid;
@@ -72,6 +73,7 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
+    //TODO: Maybe use combinedmesh
     public bool IsConnected()
     {
         return false;
