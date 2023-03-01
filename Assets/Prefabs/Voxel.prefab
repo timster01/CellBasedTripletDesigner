@@ -132,3 +132,4 @@ MonoBehaviour:
   y: 0
   z: 0
   childShape: {fileID: 162889178924995843}
+  parent: {fileID: 0}

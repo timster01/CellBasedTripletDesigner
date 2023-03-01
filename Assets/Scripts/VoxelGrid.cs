@@ -8,6 +8,9 @@ public class VoxelGrid : MonoBehaviour
     public GameObject VoxelPrefab;
     public int dimension = 5;
     public TripletBuilder parent;
+    public GameObject combinedMesh;
+
+    public bool test = false;
 
     List<List<List<Voxel>>> grid;
 
@@ -43,6 +46,8 @@ public class VoxelGrid : MonoBehaviour
     }
 
 
+
+
     public void UpdateVoxelColumnX(int z, int y)
     {
         for (int x = 0; x < dimension; x++)
@@ -72,9 +77,50 @@ public class VoxelGrid : MonoBehaviour
         return false;
     }
 
+    public void MergeVoxels()
+    {
+        //https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html
+        
+        combinedMesh.transform.localPosition = new Vector3(-dimension - 3,0,0);
+
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+        int b = 0;
+        int length = 0;
+        while (b < meshFilters.Length)
+        {
+            if (meshFilters[b].mesh != null)
+            {
+                length++;
+            }
+            b++;
+        }
+        CombineInstance[] combine = new CombineInstance[length];
+
+        int i = 0;
+        int c = 0;
+        while (i < meshFilters.Length)
+        {
+            if(meshFilters[i].sharedMesh != null)
+            {
+                combine[c].mesh = meshFilters[i].mesh;
+                combine[c].transform = meshFilters[i].transform.localToWorldMatrix;
+                c++;
+            }
+            i++;
+        }
+        combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
+        combinedMesh.GetComponent<MeshFilter>().mesh = new Mesh();
+        combinedMesh.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+        combinedMesh.gameObject.SetActive(true);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        
+        if (test)
+        {
+            test = false;
+            MergeVoxels();
+        }
     }
 }
