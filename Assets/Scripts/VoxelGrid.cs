@@ -47,6 +47,11 @@ public class VoxelGrid : MonoBehaviour
 
     }
 
+    public bool IsConnected()
+    {
+        return false;
+    }
+
     // Update is called once per frame
     void Update()
     {

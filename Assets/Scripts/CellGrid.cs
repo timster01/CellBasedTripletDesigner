@@ -8,6 +8,8 @@ public class CellGrid : MonoBehaviour
     public GameObject CellPrefab;
     public int dimension = 5;
     public TripletBuilder parent;
+    public enum CellGridAngle { Front, Side, Top}
+    public CellGridAngle cellGridAngle;
 
     List<List<Cell>> grid;
 
@@ -43,6 +45,19 @@ public class CellGrid : MonoBehaviour
     void CellUpdated()
     {
 
+    }
+
+    public bool IsSilhouetteValid()
+    {
+        foreach(List<Cell> column in grid)
+        {
+            foreach(Cell cell in column)
+            {
+                if (!cell.IsSilhouetteValid())
+                    return false;
+            }
+        }
+        return true;
     }
 
     // Update is called once per frame

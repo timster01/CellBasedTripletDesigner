@@ -29,6 +29,7 @@ public class TripletBuilder : MonoBehaviour
         topCellGridObject.transform.localRotation = Quaternion.Euler(90, 0, 0);
         topCellGrid = topCellGridObject.GetComponent<CellGrid>();
         topCellGrid.parent = this;
+        topCellGrid.cellGridAngle = CellGrid.CellGridAngle.Top;
 
         //zy
         GameObject sideCellGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
@@ -36,13 +37,25 @@ public class TripletBuilder : MonoBehaviour
         sideCellGridObject.transform.localRotation = Quaternion.Euler(0, -90, 0);
         sideCellGrid = sideCellGridObject.GetComponent<CellGrid>();
         sideCellGrid.parent = this;
+        sideCellGrid.cellGridAngle = CellGrid.CellGridAngle.Side;
 
         //xy
         GameObject frontCellGridGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
         frontCellGridGridObject.transform.localPosition = new Vector3(0, 0, -2);
         frontCellGridGridObject.transform.localRotation = Quaternion.identity;
         frontCellGrid = frontCellGridGridObject.GetComponent<CellGrid>();
-        sideCellGrid.parent = this;
+        frontCellGrid.parent = this;
+        frontCellGrid.cellGridAngle = CellGrid.CellGridAngle.Front;
+    }
+
+    public bool IsSilhouetteValid()
+    {
+        return topCellGrid.IsSilhouetteValid() && sideCellGrid.IsSilhouetteValid() && frontCellGrid.IsSilhouetteValid();
+    }
+
+    public bool IsTripletConnected()
+    {
+        return voxelGrid.IsConnected();
     }
 
     // Update is called once per frame
