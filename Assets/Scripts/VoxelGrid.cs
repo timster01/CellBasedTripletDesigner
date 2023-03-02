@@ -73,6 +73,11 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
+    public Voxel GetVoxelAtCoords(int x, int y, int z)
+    {
+        return grid[x][y][z];
+    }
+
     //TODO: Maybe use combinedmesh
     public bool IsConnected()
     {

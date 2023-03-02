@@ -21,6 +21,53 @@ public class Voxel : MonoBehaviour
     {
     }
 
+    //TODO: implement actual check
+    public bool IsConnectedUp()
+    {
+        if (y == parent.dimension - 1)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y + 1, z);
+        return false;
+    }
+
+    public bool IsConnectedDown()
+    {
+        if (y == 0)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y - 1, z);
+        return adjacentVoxel.IsConnectedUp();
+    }
+
+    public bool IsConnectedRight()
+    {
+        if (x == parent.dimension - 1)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x + 1, y, z);
+        return false;
+    }
+    public bool IsConnectedLeft()
+    {
+        if (x == 0)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x - 1, y, z);
+        return adjacentVoxel.IsConnectedRight();
+    }
+
+    public bool IsConnectedBack()
+    {
+        if (z == parent.dimension - 1)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y, z + 1);
+        return false;
+    }
+    public bool IsConnectedFront()
+    {
+        if (z == 0)
+            return true;
+        Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y, z - 1);
+        return adjacentVoxel.IsConnectedBack();
+    }
+
     public void UpdateVoxel()
     {
         Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).currentFillValue;
