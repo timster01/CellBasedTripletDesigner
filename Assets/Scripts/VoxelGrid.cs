@@ -90,7 +90,7 @@ public class VoxelGrid : MonoBehaviour
         int length = 0;
         while (b < meshFilters.Length)
         {
-            if (meshFilters[b].mesh != null)
+            if (meshFilters[b].sharedMesh != null)
             {
                 length++;
             }
@@ -104,7 +104,7 @@ public class VoxelGrid : MonoBehaviour
         {
             if(meshFilters[i].sharedMesh != null)
             {
-                combine[c].mesh = meshFilters[i].mesh;
+                combine[c].mesh = meshFilters[i].sharedMesh;
                 combine[c].transform = meshFilters[i].transform.localToWorldMatrix;
                 c++;
             }
