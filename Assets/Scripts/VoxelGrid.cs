@@ -46,7 +46,15 @@ public class VoxelGrid : MonoBehaviour
         }
     }
 
-
+    // Update is called once per frame
+    void Update()
+    {
+        if (test)
+        {
+            test = false;
+            MergeVoxels();
+        }
+    }
 
 
     public void UpdateVoxelColumnX(int z, int y)
@@ -119,15 +127,5 @@ public class VoxelGrid : MonoBehaviour
         combinedMesh.GetComponent<MeshFilter>().mesh = new Mesh();
         combinedMesh.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedMesh.gameObject.SetActive(true);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (test)
-        {
-            test = false;
-            MergeVoxels();
-        }
     }
 }

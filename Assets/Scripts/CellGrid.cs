@@ -10,6 +10,7 @@ public class CellGrid : MonoBehaviour
     public TripletBuilder parent;
     public enum CellGridAngle { Front, Side, Top}
     public CellGridAngle cellGridAngle;
+    public bool test = false;
 
     List<List<Cell>> grid;
 
@@ -37,18 +38,139 @@ public class CellGrid : MonoBehaviour
         }
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if (!test)
+            return;
+
+        if (IsSilhouetteConnected())
+            Debug.Log("Silhouette is connected");
+        else
+            Debug.Log("Silhouette is not connected");
+
+        int i = 0;
+        foreach(List<Cell> graph in GetConnectedGraphs())
+        {
+            foreach(Cell cell in graph)
+            {
+                cell.graphId = i;
+            }
+            i++;
+        }
+        test = false;
+    }
+
     public Cell GetCellAtCoords(int x, int y)
     {
         return grid[x][y];
     }
 
-    //TODO
-    public bool IsSilhouetteConnected()
+    public List<List<Cell>> GetConnectedGraphs()
     {
-        return false;
+        List<List<Cell>> graphs = new List<List<Cell>>();
+        bool shouldBreak = false;
+        bool notInAGraph;
+        List<Cell> graph;
+        bool foundCell;
+        while (true)
+        {
+            graph = new List<Cell>();
+            foundCell = false;
+            foreach (List<Cell> column in grid)
+            {
+                foreach (Cell cell in column)
+                {
+                    notInAGraph = true;
+                    if (cell.currentFillValue != Cell.FillValue.Empty)
+                    {
+                        foreach(List<Cell> foundCells in graphs)
+                        {
+                            if (foundCells.Contains(cell))
+                            {
+                                notInAGraph = false;
+                                break;
+                            }
+                        }
+
+                        if (notInAGraph)
+                        {
+                            graph.Add(cell);
+                            graph.AddRange(cell.ConnectedCells());
+                            shouldBreak = true;
+                            foundCell = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldBreak)
+                    break;
+            }
+            shouldBreak = false;
+            if (!foundCell)
+            {
+                break;
+            }
+            int i = 1;
+            while (i < graph.Count)
+            {
+                foreach (Cell cell in graph[i].ConnectedCells())
+                {
+                    if (!graph.Contains(cell))
+                        graph.Add(cell);
+                }
+                i++;
+            }
+            graphs.Add(graph);
+        }
+        return graphs;
     }
 
-    //TODO
+    public bool IsSilhouetteConnected()
+    {
+        List<Cell> graph = new List<Cell>();
+        bool shouldBreak = false;
+        foreach(List<Cell> column in grid)
+        {
+            foreach(Cell cell in column)
+            {
+                if(cell.currentFillValue != Cell.FillValue.Empty)
+                {
+                    graph.Add(cell);
+                    graph.AddRange(cell.ConnectedCells());
+                    shouldBreak = true;
+                    break;
+                }
+            }
+            if (shouldBreak)
+                break;
+        }
+        if (graph.Count == 0)
+            return true;
+        shouldBreak = false;
+        int i = 1;
+        while(i < graph.Count)
+        {
+            foreach(Cell cell in graph[i].ConnectedCells())
+            {
+                if (!graph.Contains(cell))
+                    graph.Add(cell);
+            }
+            i++;
+        }
+        foreach (List<Cell> column in grid)
+        {
+            foreach (Cell cell in column)
+            {
+                if (cell.currentFillValue != Cell.FillValue.Empty && !graph.Contains(cell))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void CellUpdated(int x, int y)
     {
         if(cellGridAngle == CellGridAngle.Front)
@@ -76,11 +198,5 @@ public class CellGrid : MonoBehaviour
             }
         }
         return true;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
