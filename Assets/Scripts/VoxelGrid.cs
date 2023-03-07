@@ -86,10 +86,122 @@ public class VoxelGrid : MonoBehaviour
         return grid[x][y][z];
     }
 
-    //TODO: Maybe use combinedmesh
-    public bool IsConnected()
+    public List<List<Voxel>> GetConnectedGraphs()
     {
-        return false;
+        List<List<Voxel>> graphs = new List<List<Voxel>>();
+        bool shouldBreak = false;
+        bool notInAGraph;
+        List<Voxel> graph;
+        bool foundCell;
+        while (true)
+        {
+            graph = new List<Voxel>();
+            foundCell = false;
+            foreach (List<List<Voxel>> plane in grid)
+            {
+                foreach (List<Voxel> column in plane)
+                {
+                    foreach (Voxel voxel in column)
+                    {
+                        notInAGraph = true;
+                        if (voxel.childShape.GetComponent<MeshFilter>().mesh.triangles.Length > 0)
+                        {
+                            foreach (List<Voxel> foundCells in graphs)
+                            {
+                                if (foundCells.Contains(voxel))
+                                {
+                                    notInAGraph = false;
+                                    break;
+                                }
+                            }
+
+                            if (notInAGraph)
+                            {
+                                graph.Add(voxel);
+                                graph.AddRange(voxel.ConnectedVoxels());
+                                shouldBreak = true;
+                                foundCell = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldBreak)
+                        break;
+                }
+                if (shouldBreak)
+                    break;
+            }
+            shouldBreak = false;
+            if (!foundCell)
+            {
+                break;
+            }
+            int i = 1;
+            while (i < graph.Count)
+            {
+                foreach (Voxel voxel in graph[i].ConnectedVoxels())
+                {
+                    if (!graph.Contains(voxel))
+                        graph.Add(voxel);
+                }
+                i++;
+            }
+            graphs.Add(graph);
+        }
+        return graphs;
+    }
+
+    public bool IsTripletConnected()
+    {
+        List<Voxel> graph = new List<Voxel>();
+        bool shouldBreak = false;
+        foreach (List<List<Voxel>> plane in grid)
+        {
+            foreach (List<Voxel> column in plane)
+            {
+                foreach (Voxel voxel in column)
+                {
+                    if (voxel.childShape.GetComponent<MeshFilter>().mesh.triangles.Length > 0)
+                    {
+                        graph.Add(voxel);
+                        graph.AddRange(voxel.ConnectedVoxels());
+                        shouldBreak = true;
+                        break;
+                    }
+                }
+                if (shouldBreak)
+                    break;
+            }
+            if (shouldBreak)
+                break;
+        }
+        if (graph.Count == 0)
+            return true;
+        shouldBreak = false;
+        int i = 1;
+        while (i < graph.Count)
+        {
+            foreach (Voxel voxel in graph[i].ConnectedVoxels())
+            {
+                if (!graph.Contains(voxel))
+                    graph.Add(voxel);
+            }
+            i++;
+        }
+        foreach (List<List<Voxel>> plane in grid)
+        {
+            foreach (List<Voxel> column in plane)
+            {
+                foreach (Voxel voxel in column)
+                {
+                    if (voxel.childShape.GetComponent<MeshFilter>().mesh.triangles.Length > 0 && !graph.Contains(voxel))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public void MergeVoxels()

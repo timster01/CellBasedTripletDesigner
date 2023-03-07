@@ -55,7 +55,7 @@ public class TripletBuilder : MonoBehaviour
 
     public bool IsTripletConnected()
     {
-        return voxelGrid.IsConnected();
+        return voxelGrid.IsTripletConnected();
     }
 
     // Update is called once per frame

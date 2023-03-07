@@ -21,52 +21,88 @@ public class Voxel : MonoBehaviour
     {
     }
 
-    //TODO: implement actual check
-    public bool IsConnectedUp()
+    private bool IsConnectedUp()
     {
         if (y == parent.dimension - 1)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y + 1, z);
+        //TODO: check if adjacent faces have overlap
+
         return false;
     }
 
-    public bool IsConnectedDown()
+    private bool IsConnectedDown()
     {
         if (y == 0)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y - 1, z);
         return adjacentVoxel.IsConnectedUp();
     }
 
-    public bool IsConnectedRight()
+    private bool IsConnectedRight()
     {
         if (x == parent.dimension - 1)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x + 1, y, z);
+        //TODO: check if adjacent faces have overlap
+
         return false;
     }
-    public bool IsConnectedLeft()
+    private bool IsConnectedLeft()
     {
         if (x == 0)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x - 1, y, z);
         return adjacentVoxel.IsConnectedRight();
     }
 
-    public bool IsConnectedBack()
+    private bool IsConnectedBack()
     {
         if (z == parent.dimension - 1)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y, z + 1);
+        //TODO: check if adjacent faces have overlap
+
         return false;
     }
-    public bool IsConnectedFront()
+    private bool IsConnectedFront()
     {
         if (z == 0)
-            return true;
+            return false;
         Voxel adjacentVoxel = parent.GetVoxelAtCoords(x, y, z - 1);
         return adjacentVoxel.IsConnectedBack();
     }
+
+    public List<Voxel> ConnectedVoxels()
+    {
+        List<Voxel> result = new List<Voxel>();
+        if (IsConnectedDown())
+        {
+            result.Add(parent.GetVoxelAtCoords(x, y - 1, z));
+        }
+        if (IsConnectedUp())
+        {
+            result.Add(parent.GetVoxelAtCoords(x, y + 1, z));
+        }
+        if (IsConnectedLeft())
+        {
+            result.Add(parent.GetVoxelAtCoords(x - 1, y, z));
+        }
+        if (IsConnectedRight())
+        {
+            result.Add(parent.GetVoxelAtCoords(x + 1, y, z));
+        }
+        if (IsConnectedFront())
+        {
+            result.Add(parent.GetVoxelAtCoords(x, y, z - 1));
+        }
+        if (IsConnectedBack())
+        {
+            result.Add(parent.GetVoxelAtCoords(x, y, z + 1));
+        }
+        return result;
+    }
+
 
     public void UpdateVoxel()
     {
@@ -84,5 +120,50 @@ public class Voxel : MonoBehaviour
         string objPath = $"{frontFillValue.ToString()}-{sideFillValue.ToString()}-{topFillValue.ToString()}";
         Mesh mesh = Resources.Load<Mesh>(objPath);
         childShape.GetComponent<MeshFilter>().mesh = mesh;
+    }
+}
+
+public struct Triangle
+{
+    Vector3 coord1, coord2, coord3;
+
+    public Triangle(Vector3 coord1, Vector3 coord2, Vector3 coord3)
+    {
+        this.coord1 = coord1;
+        this.coord2 = coord2;
+        this.coord3 = coord3;
+    }
+
+    public Triangle2D FlattenX()
+    {
+        return new Triangle2D(new Vector2(coord1.z, coord1.y), new Vector2(coord2.z, coord2.y), new Vector2(coord3.z, coord3.y));
+    }
+    public Triangle2D FlattenY()
+    {
+        return new Triangle2D(new Vector2(coord1.x, coord1.z), new Vector2(coord2.x, coord2.z), new Vector2(coord3.x, coord3.z));
+    }
+    public Triangle2D FlattenZ()
+    {
+        return new Triangle2D(new Vector2(coord1.x, coord1.y), new Vector2(coord2.x, coord2.y), new Vector2(coord3.x, coord3.y));
+    }
+
+}
+
+public struct Triangle2D
+{
+    Vector2 coord1, coord2, coord3;
+
+    public Triangle2D(Vector2 coord1, Vector2 coord2, Vector2 coord3)
+    {
+        this.coord1 = coord1;
+        this.coord2 = coord2;
+        this.coord3 = coord3;
+    }
+
+    //TODO Implement
+    public bool TriangleOverlaps(Triangle2D otherTriangle)
+    {
+        
+        return false;
     }
 }
