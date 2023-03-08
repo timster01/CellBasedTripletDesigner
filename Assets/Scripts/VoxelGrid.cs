@@ -12,6 +12,7 @@ public class VoxelGrid : MonoBehaviour
 
     //TODO: replace by button
     public bool test = false;
+    public bool test2 = false;
 
     List<List<List<Voxel>>> grid;
 
@@ -54,6 +55,25 @@ public class VoxelGrid : MonoBehaviour
             test = false;
             MergeVoxels();
         }
+
+        if (!test2)
+            return;
+
+        if (IsTripletConnected())
+            Debug.Log("Triplet is connected");
+        else
+            Debug.Log("Triplet is not connected");
+
+        int i = 0;
+        foreach (List<Voxel> graph in GetConnectedGraphs())
+        {
+            foreach (Voxel voxel in graph)
+            {
+                voxel.graphId = i;
+            }
+            i++;
+        }
+        test2 = false;
     }
 
 
@@ -177,7 +197,6 @@ public class VoxelGrid : MonoBehaviour
         }
         if (graph.Count == 0)
             return true;
-        shouldBreak = false;
         int i = 1;
         while (i < graph.Count)
         {

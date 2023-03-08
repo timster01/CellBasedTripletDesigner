@@ -147,7 +147,6 @@ public class CellGrid : MonoBehaviour
         }
         if (graph.Count == 0)
             return true;
-        shouldBreak = false;
         int i = 1;
         while(i < graph.Count)
         {
