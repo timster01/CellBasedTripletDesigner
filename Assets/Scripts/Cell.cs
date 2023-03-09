@@ -20,6 +20,12 @@ public class Cell : MonoBehaviour
     {
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        childShape.GetComponent<MeshRenderer>().material.color = parent.GetGraphColor(graphId);
+    }
+
     public void CycleFillValue()
     {
         currentFillValue = (FillValue)(((int)currentFillValue + 1) % 6);
@@ -94,12 +100,6 @@ public class Cell : MonoBehaviour
             result.Add(parent.GetCellAtCoords(x + 1, y));
         }
         return result;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
 }

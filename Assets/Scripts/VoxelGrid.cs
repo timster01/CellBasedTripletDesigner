@@ -15,10 +15,12 @@ public class VoxelGrid : MonoBehaviour
     public bool test2 = false;
 
     List<List<List<Voxel>>> grid;
+    List<Color> graphColors;
 
     // Start is called before the first frame update
     void Start()
     {
+        graphColors = new List<Color>();
         grid = new List<List<List<Voxel>>>();
         GameObject voxelObject;
         Voxel voxel;
@@ -64,18 +66,18 @@ public class VoxelGrid : MonoBehaviour
         else
             Debug.Log("Triplet is not connected");
 
-        int i = 0;
-        foreach (List<Voxel> graph in GetConnectedGraphs())
-        {
-            foreach (Voxel voxel in graph)
-            {
-                voxel.graphId = i;
-            }
-            i++;
-        }
         test2 = false;
     }
 
+    public Color GetGraphColor(int graphId)
+    {
+        for (int i = graphColors.Count; i <= graphId; i++)
+        {
+            Color newColor = Random.ColorHSV(0f, 1f, 0.8f, 1f, 0f, 1f);
+            graphColors.Add(newColor);
+        }
+        return graphColors[graphId];
+    }
 
     public void UpdateVoxelColumnX(int z, int y)
     {
@@ -83,6 +85,7 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        MarkGraphId();
     }
 
     public void UpdateVoxelColumnY(int x, int z)
@@ -91,6 +94,7 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        MarkGraphId();
     }
 
     public void UpdateVoxelColumnZ(int x, int y)
@@ -99,6 +103,7 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        MarkGraphId();
     }
 
     public Voxel GetVoxelAtCoords(int x, int y, int z)
@@ -169,6 +174,19 @@ public class VoxelGrid : MonoBehaviour
             graphs.Add(graph);
         }
         return graphs;
+    }
+
+    public void MarkGraphId()
+    {
+        int i = 0;
+        foreach (List<Voxel> graph in GetConnectedGraphs())
+        {
+            foreach (Voxel voxel in graph)
+            {
+                voxel.graphId = i;
+            }
+            i++;
+        }
     }
 
     public bool IsTripletConnected()

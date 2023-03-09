@@ -14,9 +14,12 @@ public class CellGrid : MonoBehaviour
 
     List<List<Cell>> grid;
 
+    List<Color> graphColors;
+
     // Start is called before the first frame update
     void Start()
     {
+        graphColors = new List<Color>();
         grid = new List<List<Cell>>();
         GameObject cellObject;
         Cell cell;
@@ -49,16 +52,18 @@ public class CellGrid : MonoBehaviour
         else
             Debug.Log("Silhouette is not connected");
 
-        int i = 0;
-        foreach(List<Cell> graph in GetConnectedGraphs())
-        {
-            foreach(Cell cell in graph)
-            {
-                cell.graphId = i;
-            }
-            i++;
-        }
+        
         test = false;
+    }
+
+    public Color GetGraphColor(int graphId)
+    {
+        for (int i = graphColors.Count; i <= graphId; i++)
+        {
+            Color newColor = Random.ColorHSV(0f, 1f, 0.8f, 1f, 0f, 1f, 0.3f, 0.3f);
+            graphColors.Add(newColor);
+        }
+        return graphColors[graphId];
     }
 
     public Cell GetCellAtCoords(int x, int y)
@@ -126,6 +131,19 @@ public class CellGrid : MonoBehaviour
         return graphs;
     }
 
+    public void MarkGraphId()
+    {
+        int i = 0;
+        foreach (List<Cell> graph in GetConnectedGraphs())
+        {
+            foreach (Cell cell in graph)
+            {
+                cell.graphId = i;
+            }
+            i++;
+        }
+    }
+
     public bool IsSilhouetteConnected()
     {
         List<Cell> graph = new List<Cell>();
@@ -184,6 +202,7 @@ public class CellGrid : MonoBehaviour
         {
             parent.voxelGrid.UpdateVoxelColumnY(x, y);
         }
+        MarkGraphId();
     }
 
     public bool IsSilhouetteValid()

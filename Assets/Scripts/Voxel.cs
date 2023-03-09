@@ -20,6 +20,7 @@ public class Voxel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        childShape.GetComponent<MeshRenderer>().material.color = parent.GetGraphColor(graphId);
     }
 
     private bool IsConnectedUp()
