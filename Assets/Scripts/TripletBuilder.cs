@@ -14,6 +14,8 @@ public class TripletBuilder : MonoBehaviour
     public VoxelGrid voxelGrid;
     public CellGrid topCellGrid, sideCellGrid, frontCellGrid;
 
+    public bool test = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,19 +50,28 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid.cellGridAngle = CellGrid.CellGridAngle.Front;
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if (!test)
+            return;
+
+        if (IsSilhouetteValid())
+            Debug.Log("Silhouette is valid");
+
+        if (IsTripletConnected())
+            Debug.Log("Triplet is connected");
+
+        test = false;
+    }
+
     public bool IsSilhouetteValid()
     {
-        return topCellGrid.IsSilhouetteValid() && sideCellGrid.IsSilhouetteValid() && frontCellGrid.IsSilhouetteValid();
+        return frontCellGrid.IsSilhouetteValid() && topCellGrid.IsSilhouetteValid() && sideCellGrid.IsSilhouetteValid() ;
     }
 
     public bool IsTripletConnected()
     {
         return voxelGrid.IsTripletConnected();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

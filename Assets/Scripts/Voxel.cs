@@ -183,7 +183,6 @@ public class Voxel : MonoBehaviour
         return result;
     }
 
-
     public void UpdateVoxel()
     {
         Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).currentFillValue;
