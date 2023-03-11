@@ -241,136 +241,85 @@ public class VoxelGrid : MonoBehaviour
         return true;
     }
 
-    public Mesh FlattenVoxelColumnX(int z, int y, int graphId = -1)
+    public List<polygon2D> FlattenVoxelColumnX(int z, int y, int graphId = -1)
     {
-        List<MeshFilter> meshFilters = new List<MeshFilter>();
+        List<Mesh> meshes = new List<Mesh>();
         for (int x = 0; x < dimension; x++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
-            meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+            if (grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
+                meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        int b = 0;
-        int length = 0;
-        while (b < meshFilters.Count)
+        List<polygon2D> polygons = new List<polygon2D>();
+        foreach (Mesh mesh in meshes)
         {
-            if (meshFilters[b].sharedMesh != null)
+            foreach (Triangle tri in Triangle.MeshToTriangles(mesh))
             {
-                length++;
+                Triangle2D tri2D = tri.FlattenX();
+                if (tri2D.IsInLine())
+                    continue;
+                if (tri2D.IsClockwise())
+                    tri2D = tri2D.FlipCoordOrder();
+                polygons.Add(tri2D.ToPolygon2D());
             }
-            b++;
         }
-        CombineInstance[] combine = new CombineInstance[length];
-
-        int i = 0;
-        int c = 0;
-        while (i < meshFilters.Count)
-        {
-            if (meshFilters[i].sharedMesh != null)
-            {
-                combine[c].mesh = meshFilters[i].sharedMesh;
-                c++;
-            }
-            i++;
-        }
-        Mesh flatMesh = new Mesh();
-        flatMesh.CombineMeshes(combine);
-
-        for (i = 0; i < flatMesh.vertexCount; i++)
-        {
-            flatMesh.vertices[i].x = 0;
-        }
-        flatMesh.Optimize();
-        flatMesh.RecalculateNormals();
-        return flatMesh;
+        polygons = polygon2D.MergePolygon2Ds(polygons);
+        return polygons;
     }
 
-    public Mesh FlattenVoxelColumnY(int x, int z, int graphId = -1)
+    public List<polygon2D> FlattenVoxelColumnY(int x, int z, int graphId = -1)
     {
-        List<MeshFilter> meshFilters = new List<MeshFilter>();
+        List<Mesh> meshes = new List<Mesh>();
         for (int y = 0; y < dimension; y++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
-            meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+            if (grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
+                meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        int b = 0;
-        int length = 0;
-        while (b < meshFilters.Count)
+        List<polygon2D> polygons = new List<polygon2D>();
+        foreach (Mesh mesh in meshes)
         {
-            if (meshFilters[b].sharedMesh != null)
+            foreach (Triangle tri in Triangle.MeshToTriangles(mesh))
             {
-                length++;
+                Triangle2D tri2D = tri.FlattenY();
+                if (tri2D.IsInLine())
+                    continue;
+                if (tri2D.IsClockwise())
+                    tri2D = tri2D.FlipCoordOrder();
+                polygons.Add(tri2D.ToPolygon2D());
             }
-            b++;
         }
-        CombineInstance[] combine = new CombineInstance[length];
-
-        int i = 0;
-        int c = 0;
-        while (i < meshFilters.Count)
-        {
-            if (meshFilters[i].sharedMesh != null)
-            {
-                combine[c].mesh = meshFilters[i].sharedMesh;
-                c++;
-            }
-            i++;
-        }
-        Mesh flatMesh = new Mesh();
-        flatMesh.CombineMeshes(combine);
-
-        for (i = 0; i < flatMesh.vertexCount; i++)
-        {
-            flatMesh.vertices[i].y = 0;
-        }
-        flatMesh.Optimize();
-        flatMesh.RecalculateNormals();
-        return flatMesh;
+        polygons = polygon2D.MergePolygon2Ds(polygons);
+        return polygons;
     }
 
-    public Mesh FlattenVoxelColumnZ(int x, int y, int graphId = -1)
+    public List<polygon2D> FlattenVoxelColumnZ(int x, int y, int graphId = -1)
     {
-        List<MeshFilter> meshFilters = new List<MeshFilter>();
+        List<Mesh> meshes = new List<Mesh>();
         for (int z = 0; z < dimension; z++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
-            meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+            if(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
+                meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        int b = 0;
-        int length = 0;
-        while (b < meshFilters.Count)
+        List<polygon2D> polygons = new List<polygon2D>();
+        foreach(Mesh mesh in meshes)
         {
-            if (meshFilters[b].sharedMesh != null)
+            foreach(Triangle tri in Triangle.MeshToTriangles(mesh))
             {
-                length++;
+                Triangle2D tri2D = tri.FlattenZ();
+                if (tri2D.IsInLine())
+                    continue;
+                if (tri2D.IsClockwise())
+                    tri2D = tri2D.FlipCoordOrder();
+                polygons.Add(tri2D.ToPolygon2D());
             }
-            b++;
         }
-        CombineInstance[] combine = new CombineInstance[length];
-
-        int i = 0;
-        int c = 0;
-        while (i < meshFilters.Count)
-        {
-            if (meshFilters[i].sharedMesh != null)
-            {
-                combine[c].mesh = meshFilters[i].sharedMesh;
-                c++;
-            }
-            i++;
-        }
-        Mesh flatMesh = new Mesh();
-        flatMesh.CombineMeshes(combine);
-
-        for (i = 0; i < flatMesh.vertexCount; i++)
-        {
-            flatMesh.vertices[i].z = 0;
-        }
-        flatMesh.Optimize();
-        flatMesh.RecalculateNormals();
-        return flatMesh;
+        polygons = polygon2D.MergePolygon2Ds(polygons);
+        return polygons;
     }
 
 
@@ -409,5 +358,20 @@ public class VoxelGrid : MonoBehaviour
         combinedMesh.GetComponent<MeshFilter>().mesh = new Mesh();
         combinedMesh.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedMesh.gameObject.SetActive(true);
+    }
+}
+
+public struct polygon2D
+{
+    public List<Vector2> vertices;
+
+    public int vertexCount { get { return vertices.Count; } }
+
+    //TODO
+    public static List<polygon2D> MergePolygon2Ds(List<polygon2D> polygons)
+    {
+
+
+        return polygons;
     }
 }

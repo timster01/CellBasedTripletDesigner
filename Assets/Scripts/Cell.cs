@@ -10,7 +10,6 @@ public class Cell : MonoBehaviour
     public GameObject childShape;
     public int graphId;
 
-    public Mesh DebugFlatMesh;
 
     public enum FillValue { Empty, Full, BottomLeft, BottomRight, TopLeft, TopRight}
 
@@ -48,94 +47,49 @@ public class Cell : MonoBehaviour
     //TODO: work in progress
     public bool IsSilhouetteValid(int graphId = -1)
     {
-        if(parent.cellGridAngle == CellGrid.CellGridAngle.Front)
+        List<polygon2D> polygons = new List<polygon2D>();
+        if (parent.cellGridAngle == CellGrid.CellGridAngle.Front)
         {
-            Mesh flatMesh = parent.parent.voxelGrid.FlattenVoxelColumnZ(x, y, graphId);
-            DebugFlatMesh = flatMesh;
-            if (currentFillValue == FillValue.Empty)
-            {
-                return flatMesh.vertexCount == 0;
-            }
-            if (currentFillValue == FillValue.TopLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.TopRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.Full)
-            {
-                return flatMesh.vertexCount == 4;
-            }
+            polygons = parent.parent.voxelGrid.FlattenVoxelColumnZ(x, y, graphId);
         }
 
         if (parent.cellGridAngle == CellGrid.CellGridAngle.Side)
         {
-            Mesh flatMesh = parent.parent.voxelGrid.FlattenVoxelColumnX(x, y, graphId);
-            DebugFlatMesh = flatMesh;
-            if (currentFillValue == FillValue.Empty)
-            {
-                return flatMesh.vertexCount == 0;
-            }
-            if (currentFillValue == FillValue.TopLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.TopRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.Full)
-            {
-                return flatMesh.vertexCount == 4;
-            }
+            polygons = parent.parent.voxelGrid.FlattenVoxelColumnX(x, y, graphId);
         }
 
         if (parent.cellGridAngle == CellGrid.CellGridAngle.Top)
         {
-            Mesh flatMesh = parent.parent.voxelGrid.FlattenVoxelColumnY(x, y, graphId);
-            DebugFlatMesh = flatMesh;
-            if (currentFillValue == FillValue.Empty)
-            {
-                return flatMesh.vertexCount == 0;
-            }
-            if (currentFillValue == FillValue.TopLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.TopRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomLeft)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.BottomRight)
-            {
-                return flatMesh.vertexCount == 3;
-            }
-            if (currentFillValue == FillValue.Full)
-            {
-                return flatMesh.vertexCount == 4;
-            }
+            polygons = parent.parent.voxelGrid.FlattenVoxelColumnY(x, y, graphId);
+
+        }
+
+        if (polygons.Count != 1)
+            return false;
+
+        if (currentFillValue == FillValue.Empty)
+        {
+            return polygons[0].vertexCount == 0;
+        }
+        if (currentFillValue == FillValue.TopLeft)
+        {
+            return polygons[0].vertexCount == 3;
+        }
+        if (currentFillValue == FillValue.TopRight)
+        {
+            return polygons[0].vertexCount == 3;
+        }
+        if (currentFillValue == FillValue.BottomLeft)
+        {
+            return polygons[0].vertexCount == 3;
+        }
+        if (currentFillValue == FillValue.BottomRight)
+        {
+            return polygons[0].vertexCount == 3;
+        }
+        if (currentFillValue == FillValue.Full)
+        {
+            return polygons[0].vertexCount == 4;
         }
 
         return false;

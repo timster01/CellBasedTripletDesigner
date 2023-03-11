@@ -402,4 +402,49 @@ public struct Triangle2D
         return isWithinTriangle;
     }
 
+
+    private float matrixDet()
+    {
+        float a, b, c, d, e, f, g, h, i;
+        a = coord1.x;
+        b = coord1.y;
+        c = 1;
+        d = coord2.x;
+        e = coord2.y;
+        f = 1;
+        g = coord3.x;
+        h = coord3.y;
+        i = 1;
+        float det = a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g;
+        return det;
+    }
+    public bool IsCounterClockWise()
+    {
+        return this.matrixDet() > 0;
+    }
+
+    public bool IsInLine()
+    {
+        return this.matrixDet() == 0;
+    }
+
+    public bool IsClockwise()
+    {
+
+        return this.matrixDet() < 0;
+    }
+
+    public Triangle2D FlipCoordOrder()
+    {
+        return new Triangle2D(coord3, coord2, coord1);
+    }
+
+    public polygon2D ToPolygon2D()
+    {
+        polygon2D polygon = new polygon2D();
+        polygon.vertices.Add(coord1);
+        polygon.vertices.Add(coord2);
+        polygon.vertices.Add(coord3);
+        return polygon;
+    }
 }
