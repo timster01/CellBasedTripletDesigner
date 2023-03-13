@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Clipper2Lib;
 
 public class VoxelGrid : MonoBehaviour
 {
@@ -241,7 +242,7 @@ public class VoxelGrid : MonoBehaviour
         return true;
     }
 
-    public List<polygon2D> FlattenVoxelColumnX(int z, int y, int graphId = -1)
+    public PathsD FlattenVoxelColumnX(int z, int y, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
         for (int x = 0; x < dimension; x++)
@@ -251,7 +252,7 @@ public class VoxelGrid : MonoBehaviour
             if (grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
                 meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        List<polygon2D> polygons = new List<polygon2D>();
+        PathsD polygons = new PathsD();
         foreach (Mesh mesh in meshes)
         {
             foreach (Triangle tri in Triangle.MeshToTriangles(mesh))
@@ -259,16 +260,17 @@ public class VoxelGrid : MonoBehaviour
                 Triangle2D tri2D = tri.FlattenX();
                 if (tri2D.IsInLine())
                     continue;
-                if (tri2D.IsClockwise())
+                if (tri2D.IsCounterClockWise())
                     tri2D = tri2D.FlipCoordOrder();
-                polygons.Add(tri2D.ToPolygon2D());
+                polygons.Add(tri2D.ToPathD());
             }
         }
-        polygons = polygon2D.MergePolygon2Ds(polygons);
+        polygons = Clipper.Union(polygons, FillRule.NonZero);
+        polygons = Clipper.SimplifyPaths(polygons, 0.0);
         return polygons;
     }
 
-    public List<polygon2D> FlattenVoxelColumnY(int x, int z, int graphId = -1)
+    public PathsD FlattenVoxelColumnY(int x, int z, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
         for (int y = 0; y < dimension; y++)
@@ -278,7 +280,7 @@ public class VoxelGrid : MonoBehaviour
             if (grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
                 meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        List<polygon2D> polygons = new List<polygon2D>();
+        PathsD polygons = new PathsD();
         foreach (Mesh mesh in meshes)
         {
             foreach (Triangle tri in Triangle.MeshToTriangles(mesh))
@@ -286,16 +288,17 @@ public class VoxelGrid : MonoBehaviour
                 Triangle2D tri2D = tri.FlattenY();
                 if (tri2D.IsInLine())
                     continue;
-                if (tri2D.IsClockwise())
+                if (tri2D.IsCounterClockWise())
                     tri2D = tri2D.FlipCoordOrder();
-                polygons.Add(tri2D.ToPolygon2D());
+                polygons.Add(tri2D.ToPathD());
             }
         }
-        polygons = polygon2D.MergePolygon2Ds(polygons);
+        polygons = Clipper.Union(polygons, FillRule.NonZero);
+        polygons = Clipper.SimplifyPaths(polygons, 0.0);
         return polygons;
     }
 
-    public List<polygon2D> FlattenVoxelColumnZ(int x, int y, int graphId = -1)
+    public PathsD FlattenVoxelColumnZ(int x, int y, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
         for (int z = 0; z < dimension; z++)
@@ -305,7 +308,8 @@ public class VoxelGrid : MonoBehaviour
             if(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh != null)
                 meshes.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>().mesh);
         }
-        List<polygon2D> polygons = new List<polygon2D>();
+        
+        PathsD polygons = new PathsD();
         foreach(Mesh mesh in meshes)
         {
             foreach(Triangle tri in Triangle.MeshToTriangles(mesh))
@@ -313,12 +317,13 @@ public class VoxelGrid : MonoBehaviour
                 Triangle2D tri2D = tri.FlattenZ();
                 if (tri2D.IsInLine())
                     continue;
-                if (tri2D.IsClockwise())
+                if (tri2D.IsCounterClockWise())
                     tri2D = tri2D.FlipCoordOrder();
-                polygons.Add(tri2D.ToPolygon2D());
+                polygons.Add(tri2D.ToPathD());
             }
         }
-        polygons = polygon2D.MergePolygon2Ds(polygons);
+        polygons = Clipper.Union(polygons, FillRule.NonZero);
+        polygons = Clipper.SimplifyPaths(polygons, 0.0);
         return polygons;
     }
 
@@ -358,20 +363,5 @@ public class VoxelGrid : MonoBehaviour
         combinedMesh.GetComponent<MeshFilter>().mesh = new Mesh();
         combinedMesh.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
         combinedMesh.gameObject.SetActive(true);
-    }
-}
-
-public struct polygon2D
-{
-    public List<Vector2> vertices;
-
-    public int vertexCount { get { return vertices.Count; } }
-
-    //TODO
-    public static List<polygon2D> MergePolygon2Ds(List<polygon2D> polygons)
-    {
-
-
-        return polygons;
     }
 }

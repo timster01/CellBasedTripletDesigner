@@ -58,6 +58,15 @@ public class TripletBuilder : MonoBehaviour
 
         if (IsSilhouetteValid())
             Debug.Log("Silhouette is valid");
+        else
+        {
+            if (frontCellGrid.IsSilhouetteValid())
+                Debug.Log("Front silhouette is valid");
+            if (topCellGrid.IsSilhouetteValid())
+                Debug.Log("Top silhouette is valid");
+            if (sideCellGrid.IsSilhouetteValid())
+                Debug.Log("Side silhouette is valid");
+        }
 
         if (IsTripletConnected())
             Debug.Log("Triplet is connected");

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Clipper2Lib;
 
 public class Cell : MonoBehaviour
 {
@@ -44,10 +45,9 @@ public class Cell : MonoBehaviour
         parent.CellUpdated(x, y);
     }
 
-    //TODO: work in progress
     public bool IsSilhouetteValid(int graphId = -1)
     {
-        List<polygon2D> polygons = new List<polygon2D>();
+        PathsD polygons = new PathsD();
         if (parent.cellGridAngle == CellGrid.CellGridAngle.Front)
         {
             polygons = parent.parent.voxelGrid.FlattenVoxelColumnZ(x, y, graphId);
@@ -64,32 +64,45 @@ public class Cell : MonoBehaviour
 
         }
 
+        if (currentFillValue == FillValue.Empty && polygons.Count == 0)
+        {
+            return true;
+        }
+
         if (polygons.Count != 1)
             return false;
 
-        if (currentFillValue == FillValue.Empty)
-        {
-            return polygons[0].vertexCount == 0;
-        }
+        
+
         if (currentFillValue == FillValue.TopLeft)
         {
-            return polygons[0].vertexCount == 3;
+            return polygons[0].Count == 3 && 
+                polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
+                polygons[0].Contains(new PointD(0.5, 0.5));
         }
         if (currentFillValue == FillValue.TopRight)
         {
-            return polygons[0].vertexCount == 3;
+            return polygons[0].Count == 3 && 
+                polygons[0].Contains(new PointD(0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
+                polygons[0].Contains(new PointD(0.5, 0.5));
         }
         if (currentFillValue == FillValue.BottomLeft)
         {
-            return polygons[0].vertexCount == 3;
+            return polygons[0].Count == 3 && 
+                polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
+                polygons[0].Contains(new PointD(0.5, -0.5));
         }
         if (currentFillValue == FillValue.BottomRight)
         {
-            return polygons[0].vertexCount == 3;
+            return polygons[0].Count == 3 && 
+                polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(0.5, 0.5)) && 
+                polygons[0].Contains(new PointD(0.5, -0.5));
         }
         if (currentFillValue == FillValue.Full)
         {
-            return polygons[0].vertexCount == 4;
+            return polygons[0].Count == 4 && 
+                polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
+                polygons[0].Contains(new PointD(0.5, 0.5)) && polygons[0].Contains(new PointD(0.5, -0.5));
         }
 
         return false;

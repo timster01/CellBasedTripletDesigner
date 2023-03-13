@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using Clipper2Lib;
 
 public class Voxel : MonoBehaviour
 {
@@ -439,12 +440,12 @@ public struct Triangle2D
         return new Triangle2D(coord3, coord2, coord1);
     }
 
-    public polygon2D ToPolygon2D()
+    public PathD ToPathD()
     {
-        polygon2D polygon = new polygon2D();
-        polygon.vertices.Add(coord1);
-        polygon.vertices.Add(coord2);
-        polygon.vertices.Add(coord3);
+        PathD polygon = new PathD();
+        polygon.Add(new PointD((double)coord1.x, (double)coord1.y));
+        polygon.Add(new PointD((double)coord2.x, (double)coord2.y));
+        polygon.Add(new PointD((double)coord3.x, (double)coord3.y));
         return polygon;
     }
 }
