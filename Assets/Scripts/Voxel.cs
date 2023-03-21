@@ -186,9 +186,15 @@ public class Voxel : MonoBehaviour
 
     public void UpdateVoxel()
     {
-        Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).currentFillValue;
-        Cell.FillValue sideCellFillValue = parent.parent.sideCellGrid.GetCellAtCoords(z, y).currentFillValue;
-        Cell.FillValue topCellFillValue = parent.parent.topCellGrid.GetCellAtCoords(x, z).currentFillValue;
+        Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).CurrentFillValue;
+        if (parent.parent.frontCellGrid.IsEmpty())
+            frontCellFillValue = Cell.FillValue.Full;
+        Cell.FillValue sideCellFillValue = parent.parent.sideCellGrid.GetCellAtCoords(z, y).CurrentFillValue;
+        if (parent.parent.sideCellGrid.IsEmpty())
+            sideCellFillValue = Cell.FillValue.Full;
+        Cell.FillValue topCellFillValue = parent.parent.topCellGrid.GetCellAtCoords(x, z).CurrentFillValue;
+        if (parent.parent.topCellGrid.IsEmpty())
+            topCellFillValue = Cell.FillValue.Full;
         SetVoxel(frontCellFillValue, sideCellFillValue, topCellFillValue);
     }
 

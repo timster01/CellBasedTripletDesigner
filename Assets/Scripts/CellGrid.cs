@@ -16,6 +16,8 @@ public class CellGrid : MonoBehaviour
 
     List<Color> graphColors;
 
+    public int emptyCount;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -39,6 +41,12 @@ public class CellGrid : MonoBehaviour
             }
             grid.Add(column);
         }
+        emptyCount = dimension * dimension;
+    }
+
+    public bool IsEmpty()
+    {
+        return emptyCount == dimension * dimension;
     }
 
     // Update is called once per frame
@@ -87,7 +95,7 @@ public class CellGrid : MonoBehaviour
                 foreach (Cell cell in column)
                 {
                     notInAGraph = true;
-                    if (cell.currentFillValue != Cell.FillValue.Empty)
+                    if (cell.CurrentFillValue != Cell.FillValue.Empty)
                     {
                         foreach(List<Cell> foundCells in graphs)
                         {
@@ -152,7 +160,7 @@ public class CellGrid : MonoBehaviour
         {
             foreach(Cell cell in column)
             {
-                if(cell.currentFillValue != Cell.FillValue.Empty)
+                if(cell.CurrentFillValue != Cell.FillValue.Empty)
                 {
                     graph.Add(cell);
                     graph.AddRange(cell.ConnectedCells());
@@ -179,7 +187,7 @@ public class CellGrid : MonoBehaviour
         {
             foreach (Cell cell in column)
             {
-                if (cell.currentFillValue != Cell.FillValue.Empty && !graph.Contains(cell))
+                if (cell.CurrentFillValue != Cell.FillValue.Empty && !graph.Contains(cell))
                 {
                     return false;
                 }
@@ -192,21 +200,38 @@ public class CellGrid : MonoBehaviour
     {
         if(cellGridAngle == CellGridAngle.Front)
         {
-            parent.voxelGrid.UpdateVoxelColumnZ(x, y);
+            if(emptyCount == dimension * dimension - 1)
+                for(int xval = 0; xval < dimension; xval++)
+                    for (int yval = 0; yval < dimension; yval++)
+                        parent.voxelGrid.UpdateVoxelColumnZ(xval, yval);
+            else
+                parent.voxelGrid.UpdateVoxelColumnZ(x, y);
         }
         if (cellGridAngle == CellGridAngle.Side)
         {
-            parent.voxelGrid.UpdateVoxelColumnX(x, y);
+            if (emptyCount == dimension * dimension - 1)
+                for (int xval = 0; xval < dimension; xval++)
+                    for (int yval = 0; yval < dimension; yval++)
+                        parent.voxelGrid.UpdateVoxelColumnX(xval, yval);
+            else
+                parent.voxelGrid.UpdateVoxelColumnX(x, y);
         }
         if (cellGridAngle == CellGridAngle.Top)
         {
-            parent.voxelGrid.UpdateVoxelColumnY(x, y);
+            if (emptyCount == dimension * dimension - 1)
+                for (int xval = 0; xval < dimension; xval++)
+                    for (int yval = 0; yval < dimension; yval++)
+                        parent.voxelGrid.UpdateVoxelColumnY(xval, yval);
+            else
+                parent.voxelGrid.UpdateVoxelColumnY(x, y);
         }
         MarkGraphId();
     }
 
     public bool IsSilhouetteValid()
     {
+        if (IsEmpty())
+            return true;
         foreach(List<Cell> column in grid)
         {
             foreach(Cell cell in column)

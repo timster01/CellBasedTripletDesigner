@@ -16,7 +16,18 @@ public class Cell : MonoBehaviour
 
 
 
-    public FillValue currentFillValue = FillValue.Empty;
+    private FillValue currentFillValue = FillValue.Empty;
+
+    public FillValue CurrentFillValue { 
+        get => currentFillValue; 
+        set {
+            if (currentFillValue == FillValue.Empty)
+                parent.emptyCount--;
+            if (value == FillValue.Empty)
+                parent.emptyCount++;
+            currentFillValue = value; 
+        } 
+    }
 
     void Start()
     {
@@ -30,16 +41,16 @@ public class Cell : MonoBehaviour
 
     public void CycleFillValue()
     {
-        currentFillValue = (FillValue)(((int)currentFillValue + 1) % 6);
+        CurrentFillValue = (FillValue)(((int)CurrentFillValue + 1) % 6);
         UpdateShape();
     }
 
     public void UpdateShape()
     {
-        if (currentFillValue == Cell.FillValue.Empty)
+        if (CurrentFillValue == Cell.FillValue.Empty)
             childShape.GetComponent<MeshFilter>().mesh.Clear();
 
-        string objPath = $"BaseShapes/{currentFillValue.ToString()}";
+        string objPath = $"BaseShapes/{CurrentFillValue.ToString()}";
         Mesh mesh = Resources.Load<Mesh>(objPath);
         childShape.GetComponent<MeshFilter>().mesh = mesh;
         parent.CellUpdated(x, y);
@@ -64,7 +75,7 @@ public class Cell : MonoBehaviour
 
         }
 
-        if (currentFillValue == FillValue.Empty && polygons.Count == 0)
+        if (CurrentFillValue == FillValue.Empty && polygons.Count == 0)
         {
             return true;
         }
@@ -74,31 +85,31 @@ public class Cell : MonoBehaviour
 
         
 
-        if (currentFillValue == FillValue.TopLeft)
+        if (CurrentFillValue == FillValue.TopLeft)
         {
             return polygons[0].Count == 3 && 
                 polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
                 polygons[0].Contains(new PointD(0.5, 0.5));
         }
-        if (currentFillValue == FillValue.TopRight)
+        if (CurrentFillValue == FillValue.TopRight)
         {
             return polygons[0].Count == 3 && 
                 polygons[0].Contains(new PointD(0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
                 polygons[0].Contains(new PointD(0.5, 0.5));
         }
-        if (currentFillValue == FillValue.BottomLeft)
+        if (CurrentFillValue == FillValue.BottomLeft)
         {
             return polygons[0].Count == 3 && 
                 polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
                 polygons[0].Contains(new PointD(0.5, -0.5));
         }
-        if (currentFillValue == FillValue.BottomRight)
+        if (CurrentFillValue == FillValue.BottomRight)
         {
             return polygons[0].Count == 3 && 
                 polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(0.5, 0.5)) && 
                 polygons[0].Contains(new PointD(0.5, -0.5));
         }
-        if (currentFillValue == FillValue.Full)
+        if (CurrentFillValue == FillValue.Full)
         {
             return polygons[0].Count == 4 && 
                 polygons[0].Contains(new PointD(-0.5, -0.5)) && polygons[0].Contains(new PointD(-0.5, 0.5)) && 
@@ -113,7 +124,7 @@ public class Cell : MonoBehaviour
         if (y == parent.dimension - 1)
             return false;
         Cell adjacentCell = parent.GetCellAtCoords(x, y + 1);
-        return ((currentFillValue == FillValue.Full || currentFillValue == FillValue.TopLeft || currentFillValue == FillValue.TopRight) && (adjacentCell.currentFillValue == FillValue.Full || adjacentCell.currentFillValue == FillValue.BottomLeft || adjacentCell.currentFillValue == FillValue.BottomRight));
+        return ((CurrentFillValue == FillValue.Full || CurrentFillValue == FillValue.TopLeft || CurrentFillValue == FillValue.TopRight) && (adjacentCell.CurrentFillValue == FillValue.Full || adjacentCell.CurrentFillValue == FillValue.BottomLeft || adjacentCell.CurrentFillValue == FillValue.BottomRight));
     }
 
     private bool IsConnectedDown()
@@ -129,7 +140,7 @@ public class Cell : MonoBehaviour
         if (x == parent.dimension - 1)
             return false;
         Cell adjacentCell = parent.GetCellAtCoords(x + 1, y);
-        return ((currentFillValue == FillValue.Full || currentFillValue == FillValue.TopRight || currentFillValue == FillValue.BottomRight) && (adjacentCell.currentFillValue == FillValue.Full || adjacentCell.currentFillValue == FillValue.TopLeft || adjacentCell.currentFillValue == FillValue.BottomLeft));
+        return ((CurrentFillValue == FillValue.Full || CurrentFillValue == FillValue.TopRight || CurrentFillValue == FillValue.BottomRight) && (adjacentCell.CurrentFillValue == FillValue.Full || adjacentCell.CurrentFillValue == FillValue.TopLeft || adjacentCell.CurrentFillValue == FillValue.BottomLeft));
     }
     private bool IsConnectedLeft()
     {

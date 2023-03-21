@@ -57,15 +57,17 @@ public class TripletBuilder : MonoBehaviour
             return;
 
         if (IsSilhouetteValid())
-            Debug.Log("Silhouette is valid");
+            Debug.Log($"Silhouette is valid{(frontCellGrid.IsEmpty() ? ", front has no active silhouette" : "")}" +
+                $"{(topCellGrid.IsEmpty() ? ", top has no active silhouette" : "")}" +
+                $"{(sideCellGrid.IsEmpty() ? ", side has no active silhouette" : "")}");
         else
         {
             if (frontCellGrid.IsSilhouetteValid())
-                Debug.Log("Front silhouette is valid");
+                Debug.Log($"Front silhouette is valid{(frontCellGrid.IsEmpty() ? ", Because it has no active silhouette" :"" )}");
             if (topCellGrid.IsSilhouetteValid())
-                Debug.Log("Top silhouette is valid");
+                Debug.Log($"Top silhouette is valid{(topCellGrid.IsEmpty() ? ", Because it has no active silhouette" : "")}");
             if (sideCellGrid.IsSilhouetteValid())
-                Debug.Log("Side silhouette is valid");
+                Debug.Log($"Side silhouette is valid{(sideCellGrid.IsEmpty() ? ", Because it has no active silhouette" : "")}");
         }
 
         if (IsTripletConnected())
