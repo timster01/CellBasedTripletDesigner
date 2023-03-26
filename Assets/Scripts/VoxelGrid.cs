@@ -48,6 +48,7 @@ public class VoxelGrid : MonoBehaviour
             }
             grid.Add(plane);
         }
+        UpdateAllVoxels();
     }
 
     // Update is called once per frame
@@ -104,6 +105,17 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        MarkGraphId();
+    }
+
+    public void UpdateAllVoxels()
+    {
+        for (int x = 0; x < dimension; x++)
+            for (int y = 0; y < dimension; y++)
+                for (int z = 0; z < dimension; z++)
+                {
+                    grid[x][y][z].UpdateVoxel();
+                }
         MarkGraphId();
     }
 

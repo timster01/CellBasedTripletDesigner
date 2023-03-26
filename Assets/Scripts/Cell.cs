@@ -25,7 +25,8 @@ public class Cell : MonoBehaviour
                 parent.emptyCount--;
             if (value == FillValue.Empty)
                 parent.emptyCount++;
-            currentFillValue = value; 
+            currentFillValue = value;
+            UpdateShape();
         } 
     }
 
@@ -42,7 +43,6 @@ public class Cell : MonoBehaviour
     public void CycleFillValue()
     {
         CurrentFillValue = (FillValue)(((int)CurrentFillValue + 1) % 6);
-        UpdateShape();
     }
 
     public void UpdateShape()

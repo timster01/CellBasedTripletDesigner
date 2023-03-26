@@ -198,32 +198,19 @@ public class CellGrid : MonoBehaviour
 
     public void CellUpdated(int x, int y)
     {
-        if(cellGridAngle == CellGridAngle.Front)
+        if (emptyCount >= dimension * dimension - 1)
+            parent.voxelGrid.UpdateAllVoxels();
+        else if (cellGridAngle == CellGridAngle.Front)
         {
-            if(emptyCount == dimension * dimension - 1)
-                for(int xval = 0; xval < dimension; xval++)
-                    for (int yval = 0; yval < dimension; yval++)
-                        parent.voxelGrid.UpdateVoxelColumnZ(xval, yval);
-            else
-                parent.voxelGrid.UpdateVoxelColumnZ(x, y);
+            parent.voxelGrid.UpdateVoxelColumnZ(x, y);
         }
-        if (cellGridAngle == CellGridAngle.Side)
+        else if (cellGridAngle == CellGridAngle.Side)
         {
-            if (emptyCount == dimension * dimension - 1)
-                for (int xval = 0; xval < dimension; xval++)
-                    for (int yval = 0; yval < dimension; yval++)
-                        parent.voxelGrid.UpdateVoxelColumnX(xval, yval);
-            else
-                parent.voxelGrid.UpdateVoxelColumnX(x, y);
+            parent.voxelGrid.UpdateVoxelColumnX(x, y);
         }
-        if (cellGridAngle == CellGridAngle.Top)
+        else if (cellGridAngle == CellGridAngle.Top)
         {
-            if (emptyCount == dimension * dimension - 1)
-                for (int xval = 0; xval < dimension; xval++)
-                    for (int yval = 0; yval < dimension; yval++)
-                        parent.voxelGrid.UpdateVoxelColumnY(xval, yval);
-            else
-                parent.voxelGrid.UpdateVoxelColumnY(x, y);
+            parent.voxelGrid.UpdateVoxelColumnY(x, y);
         }
         MarkGraphId();
     }

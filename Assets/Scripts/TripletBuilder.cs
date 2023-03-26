@@ -19,12 +19,6 @@ public class TripletBuilder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject VoxelGridObject = GameObject.Instantiate(voxelGridPrefab, this.transform);
-        VoxelGridObject.transform.localPosition = new Vector3(0, 0, 0);
-        VoxelGridObject.transform.localRotation = Quaternion.identity;
-        voxelGrid = VoxelGridObject.GetComponent<VoxelGrid>();
-        voxelGrid.parent = this;
-
         //xz
         GameObject topCellGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
         topCellGridObject.transform.localPosition = new Vector3(0, dimensions + 2, 0);
@@ -48,6 +42,13 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid = frontCellGridGridObject.GetComponent<CellGrid>();
         frontCellGrid.parent = this;
         frontCellGrid.cellGridAngle = CellGrid.CellGridAngle.Front;
+
+        //VoxelGrid
+        GameObject VoxelGridObject = GameObject.Instantiate(voxelGridPrefab, this.transform);
+        VoxelGridObject.transform.localPosition = new Vector3(0, 0, 0);
+        VoxelGridObject.transform.localRotation = Quaternion.identity;
+        voxelGrid = VoxelGridObject.GetComponent<VoxelGrid>();
+        voxelGrid.parent = this;
     }
 
     // Update is called once per frame

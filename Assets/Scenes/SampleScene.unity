@@ -133,7 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 124059334}
   - component: {fileID: 124059333}
-  - component: {fileID: 124059332}
   - component: {fileID: 124059331}
   m_Layer: 0
   m_Name: FrontCamera
@@ -154,14 +153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa72f684a85aa1a4387188b6df1cc3b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!81 &124059332
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 124059330}
-  m_Enabled: 1
 --- !u!20 &124059333
 Camera:
   m_ObjectHideFlags: 0
@@ -230,7 +221,6 @@ GameObject:
   m_Component:
   - component: {fileID: 505082494}
   - component: {fileID: 505082493}
-  - component: {fileID: 505082492}
   - component: {fileID: 505082491}
   m_Layer: 0
   m_Name: TopCamera
@@ -251,14 +241,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa72f684a85aa1a4387188b6df1cc3b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!81 &505082492
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 505082490}
-  m_Enabled: 1
 --- !u!20 &505082493
 Camera:
   m_ObjectHideFlags: 0
@@ -375,7 +357,6 @@ GameObject:
   m_Component:
   - component: {fileID: 589591246}
   - component: {fileID: 589591245}
-  - component: {fileID: 589591244}
   - component: {fileID: 589591243}
   m_Layer: 0
   m_Name: SideCamera
@@ -396,14 +377,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa72f684a85aa1a4387188b6df1cc3b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!81 &589591244
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 589591242}
-  m_Enabled: 1
 --- !u!20 &589591245
 Camera:
   m_ObjectHideFlags: 0
