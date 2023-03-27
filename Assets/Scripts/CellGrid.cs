@@ -6,6 +6,7 @@ public class CellGrid : MonoBehaviour
 {
 
     public GameObject CellPrefab;
+    public GameObject SilhouetteCellPrefab;
     public int dimension = 5;
     public TripletBuilder parent;
     public enum CellGridAngle { Front, Side, Top}
@@ -13,6 +14,7 @@ public class CellGrid : MonoBehaviour
     public bool test = false;
 
     List<List<Cell>> grid;
+    List<List<SilhouetteCell>> silhouetteGrid;
 
     List<Color> graphColors;
 
@@ -23,11 +25,15 @@ public class CellGrid : MonoBehaviour
     {
         graphColors = new List<Color>();
         grid = new List<List<Cell>>();
+        silhouetteGrid = new List<List<SilhouetteCell>>();
         GameObject cellObject;
         Cell cell;
+        GameObject silhouetteCellObject;
+        SilhouetteCell silhouetteCell;
         for (int x = 0; x < dimension; x++)
         {
             List<Cell> column = new List<Cell>();
+            List<SilhouetteCell> silhouetteColumn = new List<SilhouetteCell>();
             for (int y = 0; y < dimension; y++)
             {
                 cellObject = GameObject.Instantiate(CellPrefab, this.transform);
@@ -38,8 +44,17 @@ public class CellGrid : MonoBehaviour
                 cell.y = y;
                 cell.parent = this;
                 column.Add(cell);
+                silhouetteCellObject = GameObject.Instantiate(SilhouetteCellPrefab, this.transform);
+                silhouetteCellObject.transform.localPosition = new Vector3(x, y, -0.1f);
+                silhouetteCellObject.transform.localRotation = Quaternion.identity;
+                silhouetteCell = silhouetteCellObject.GetComponent<SilhouetteCell>();
+                silhouetteCell.x = x;
+                silhouetteCell.y = y;
+                silhouetteCell.parent = this;
+                silhouetteColumn.Add(silhouetteCell);
             }
             grid.Add(column);
+            silhouetteGrid.Add(silhouetteColumn);
         }
         emptyCount = dimension * dimension;
     }

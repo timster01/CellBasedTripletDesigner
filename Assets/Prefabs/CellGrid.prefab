@@ -44,4 +44,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5176100ad8d824469239fe1583ebdce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CellPrefab: {fileID: 4705256997561107955, guid: fd46a9a6d14dce4488d12995333c1007, type: 3}
+  CellPrefab: {fileID: 4705256997561107955, guid: 563a389e37bbb414db9d31d36e194c3f, type: 3}
+  SilhouetteCellPrefab: {fileID: 4705256997561107955, guid: fd46a9a6d14dce4488d12995333c1007, type: 3}
+  dimension: 5
+  parent: {fileID: 0}
+  cellGridAngle: 0
+  test: 0
+  emptyCount: 0
