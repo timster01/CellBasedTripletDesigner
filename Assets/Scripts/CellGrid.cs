@@ -211,6 +211,18 @@ public class CellGrid : MonoBehaviour
         return true;
     }
 
+    public void UpdateSilhouetteCell(int x, int y)
+    {
+        silhouetteGrid[x][y].UpdateShape();
+    }
+
+    public void UpdateAllSilhouetteCells()
+    {
+        foreach (List<SilhouetteCell> column in silhouetteGrid)
+            foreach (SilhouetteCell silhouetteCell in column)
+                silhouetteCell.UpdateShape();
+    }
+
     public void CellUpdated(int x, int y)
     {
         if (emptyCount >= dimension * dimension - 1)

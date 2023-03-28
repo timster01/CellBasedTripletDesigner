@@ -87,6 +87,12 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        parent.sideCellGrid.UpdateSilhouetteCell(z, y);
+        for (int i = 0; i < dimension; i++)
+        {
+            parent.frontCellGrid.UpdateSilhouetteCell(i, y);
+            parent.topCellGrid.UpdateSilhouetteCell(i, z);
+        }
         MarkGraphId();
     }
 
@@ -96,6 +102,12 @@ public class VoxelGrid : MonoBehaviour
         {
             grid[x][y][z].UpdateVoxel();
         }
+        parent.topCellGrid.UpdateSilhouetteCell(x, z);
+        for (int i = 0; i < dimension; i++)
+        {
+            parent.sideCellGrid.UpdateSilhouetteCell(i, z);
+            parent.frontCellGrid.UpdateSilhouetteCell(x, i);
+        }
         MarkGraphId();
     }
 
@@ -104,6 +116,12 @@ public class VoxelGrid : MonoBehaviour
         for (int z = 0; z < dimension; z++)
         {
             grid[x][y][z].UpdateVoxel();
+        }
+        parent.frontCellGrid.UpdateSilhouetteCell(x, y);
+        for (int i = 0; i < dimension; i++)
+        {
+            parent.sideCellGrid.UpdateSilhouetteCell(i, y);
+            parent.topCellGrid.UpdateSilhouetteCell(x, i);
         }
         MarkGraphId();
     }
@@ -117,6 +135,9 @@ public class VoxelGrid : MonoBehaviour
                     grid[x][y][z].UpdateVoxel();
                 }
         MarkGraphId();
+        parent.frontCellGrid.UpdateAllSilhouetteCells();
+        parent.sideCellGrid.UpdateAllSilhouetteCells();
+        parent.topCellGrid.UpdateAllSilhouetteCells();
     }
 
     public Voxel GetVoxelAtCoords(int x, int y, int z)

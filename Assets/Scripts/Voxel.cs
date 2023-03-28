@@ -389,7 +389,7 @@ public struct Triangle2D
         return isIntersecting;
     }
 
-    bool IsPointInTriangle(Vector2 p)
+    public bool IsPointInTriangle(Vector2 p)
     {
         bool isWithinTriangle = false;
 
