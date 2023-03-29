@@ -391,6 +391,8 @@ public struct Triangle2D
 
     public bool IsPointInTriangle(Vector2 p)
     {
+        if (IsClockwise())
+            return this.FlipCoordOrder().IsPointInTriangle(p);
         bool isWithinTriangle = false;
 
         float denominator = ((this.coord2.y - this.coord3.y) * (this.coord1.x - this.coord3.x) + (this.coord3.x - this.coord2.x) * (this.coord1.y - this.coord3.y));

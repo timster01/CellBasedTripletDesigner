@@ -61,7 +61,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: afae941f947127e4095b5203eef7b9ea, type: 2}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -132,4 +132,3 @@ MonoBehaviour:
   y: 0
   parent: {fileID: 0}
   childShape: {fileID: 3769881745908865795}
-  graphId: 0

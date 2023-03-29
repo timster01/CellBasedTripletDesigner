@@ -45,7 +45,7 @@ public class CellGrid : MonoBehaviour
                 cell.parent = this;
                 column.Add(cell);
                 silhouetteCellObject = GameObject.Instantiate(SilhouetteCellPrefab, this.transform);
-                silhouetteCellObject.transform.localPosition = new Vector3(x, y, -0.1f);
+                silhouetteCellObject.transform.localPosition = new Vector3(x, y, 0.5f);
                 silhouetteCellObject.transform.localRotation = Quaternion.identity;
                 silhouetteCell = silhouetteCellObject.GetComponent<SilhouetteCell>();
                 silhouetteCell.x = x;

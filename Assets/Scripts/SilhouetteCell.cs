@@ -63,93 +63,27 @@ public class SilhouetteCell : MonoBehaviour
 
     Mesh TriangulatePolygon(PathD polygon)
     {
-        Mesh mesh = new Mesh();
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> triangles = new List<int>();
-        LinkedList<Vector2> polygonLinked = new LinkedList<Vector2>();
-        foreach (PointD point in polygon)
-            polygonLinked.AddLast(new Vector2((float)point.x, (float)point.y));
-        LinkedListNode<Vector2> firstNode = polygonLinked.First;
-        LinkedListNode<Vector2> currentNode = polygonLinked.First;
-        LinkedListNode<Vector2> lastNode = polygonLinked.Last;
-        while (polygonLinked.Count > 2)
+        List<Vector2> polyPoints = new List<Vector2>();
+        foreach(PointD point in polygon)
         {
-            firstNode = polygonLinked.First;
-            currentNode = polygonLinked.First;
-            lastNode = polygonLinked.Last;
-            bool failedToFindEar = true;
-            while(currentNode != lastNode)
-            {
-                bool isEar = false;
-                if (currentNode == firstNode)
-                    isEar = IsEar(lastNode.Value, currentNode.Value, currentNode.Next.Value, polygonLinked);
-                else if (currentNode == lastNode)
-                    isEar = IsEar(currentNode.Previous.Value, currentNode.Value, firstNode.Value, polygonLinked);
-                else
-                    isEar = IsEar(currentNode.Previous.Value, currentNode.Value, currentNode.Next.Value, polygonLinked);
-                if (isEar)
-                {
-                    if (vertices.Contains(currentNode.Previous.Value))
-                    {
-                        triangles.Add(vertices.IndexOf(currentNode.Previous.Value));
-                    }
-                    else
-                    {
-                        vertices.Add(currentNode.Previous.Value);
-                        triangles.Add(vertices.Count - 1);
-                    }
-
-                    if (vertices.Contains(currentNode.Value))
-                    {
-                        triangles.Add(vertices.IndexOf(currentNode.Value));
-                    }
-                    else
-                    {
-                        vertices.Add(currentNode.Value);
-                        triangles.Add(vertices.Count - 1);
-                    }
-
-                    if (vertices.Contains(currentNode.Next.Value))
-                    {
-                        triangles.Add(vertices.IndexOf(currentNode.Next.Value));
-                    }
-                    else
-                    {
-                        vertices.Add(currentNode.Next.Value);
-                        triangles.Add(vertices.Count - 1);
-                    }
-
-                    polygonLinked.Remove(currentNode);
-                    failedToFindEar = false;
-                    break;
-                }
-                currentNode = currentNode.Next;
-            }
-            if (failedToFindEar)
-            {
-                Debug.LogError($"Failed to find an ear in silhouette cell {x}, {y}");
-                return new Mesh();
-            }
-                
+            polyPoints.Add(new Vector2((float)point.x, (float)point.y));
         }
-
+        Vector2[] verts2D = polyPoints.ToArray();
+        Sebastian.Geometry.Polygon triangulatePoly = new Sebastian.Geometry.Polygon(verts2D);
+        Sebastian.Geometry.Triangulator triangulator = new Sebastian.Geometry.Triangulator(triangulatePoly);
+        int[] tris = triangulator.Triangulate();
+        List<int> trisList = new List<int>();
+        for (int i = 0; i < tris.Length; i++)
+            trisList.Add(tris[i]);
+        for (int i = tris.Length - 1; i >= 0; i--)
+            trisList.Add(tris[i]);
+        List<Vector3> verts = new List<Vector3>();
+        foreach (Vector2 vert2d in verts2D)
+            verts.Add(vert2d);
+        Mesh mesh = new Mesh();
+        mesh.vertices = verts.ToArray();
+        mesh.triangles = trisList.ToArray();
         return mesh;
     }
 
-    bool IsEar(Vector2 vPrev, Vector2 v, Vector2 vNext, LinkedList<Vector2> vertices)
-    {
-        //TODO: test this angle formula
-        float angle = Mathf.Acos(((vPrev - v).sqrMagnitude + (vNext - v).sqrMagnitude + (vPrev - vNext).sqrMagnitude) / 2 * (vPrev - v).sqrMagnitude * (vNext - v).sqrMagnitude);
-        if (!(angle < Mathf.PI))
-            return false;
-
-        Triangle2D triangle = new Triangle2D(vPrev, v, vNext);
-        foreach (Vector2 vertex in vertices)
-        {
-            if ((vertex != vPrev || vertex != v || vertex != vNext) && triangle.IsPointInTriangle(vertex))
-                return false;
-        }
-
-        return true;
-    }
 }
