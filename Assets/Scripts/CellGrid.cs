@@ -9,9 +9,11 @@ public class CellGrid : MonoBehaviour
     public GameObject SilhouetteCellPrefab;
     public int dimension = 5;
     public TripletBuilder parent;
-    public enum CellGridAngle { Front, Side, Top}
+    public enum CellGridAngle { Front, Side, Top }
     public CellGridAngle cellGridAngle;
-    public bool test = false;
+    public bool testRot = false;
+    public bool testTopBot = false;
+    public bool testLR = false;
 
     List<List<Cell>> grid;
     List<List<SilhouetteCell>> silhouetteGrid;
@@ -19,6 +21,7 @@ public class CellGrid : MonoBehaviour
     List<Color> graphColors;
 
     public int emptyCount;
+    private bool runningBatchOperation = false;
 
     // Start is called before the first frame update
     void Start()
@@ -67,16 +70,23 @@ public class CellGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!test)
-            return;
+        if (testRot)
+        {
+            RotateClockWise();
+            testRot = false;
+        }
 
-        if (IsSilhouetteConnected())
-            Debug.Log("Silhouette is connected");
-        else
-            Debug.Log("Silhouette is not connected");
+        if (testTopBot)
+        {
+            MirrorTopBottom();
+            testTopBot = false;
+        }
 
-        
-        test = false;
+        if (testLR)
+        {
+            MirrorLeftRight();
+            testLR = false;
+        }
     }
 
     public Color GetGraphColor(int graphId)
@@ -112,7 +122,7 @@ public class CellGrid : MonoBehaviour
                     notInAGraph = true;
                     if (cell.CurrentFillValue != Cell.FillValue.Empty)
                     {
-                        foreach(List<Cell> foundCells in graphs)
+                        foreach (List<Cell> foundCells in graphs)
                         {
                             if (foundCells.Contains(cell))
                             {
@@ -171,11 +181,11 @@ public class CellGrid : MonoBehaviour
     {
         List<Cell> graph = new List<Cell>();
         bool shouldBreak = false;
-        foreach(List<Cell> column in grid)
+        foreach (List<Cell> column in grid)
         {
-            foreach(Cell cell in column)
+            foreach (Cell cell in column)
             {
-                if(cell.CurrentFillValue != Cell.FillValue.Empty)
+                if (cell.CurrentFillValue != Cell.FillValue.Empty)
                 {
                     graph.Add(cell);
                     graph.AddRange(cell.ConnectedCells());
@@ -189,9 +199,9 @@ public class CellGrid : MonoBehaviour
         if (graph.Count == 0)
             return true;
         int i = 1;
-        while(i < graph.Count)
+        while (i < graph.Count)
         {
-            foreach(Cell cell in graph[i].ConnectedCells())
+            foreach (Cell cell in graph[i].ConnectedCells())
             {
                 if (!graph.Contains(cell))
                     graph.Add(cell);
@@ -223,8 +233,22 @@ public class CellGrid : MonoBehaviour
                 silhouetteCell.UpdateShape();
     }
 
+    public void StartBatchOperation()
+    {
+        runningBatchOperation = true;
+    }
+    public void FinishBatchOperation()
+    {
+        runningBatchOperation = false;
+        parent.voxelGrid.UpdateAllVoxels();
+        MarkGraphId();
+    }
+
     public void CellUpdated(int x, int y)
     {
+        if (runningBatchOperation)
+            return;
+
         if (emptyCount >= dimension * dimension - 1)
             parent.voxelGrid.UpdateAllVoxels();
         else if (cellGridAngle == CellGridAngle.Front)
@@ -246,14 +270,101 @@ public class CellGrid : MonoBehaviour
     {
         if (IsEmpty())
             return true;
-        foreach(List<Cell> column in grid)
+        foreach (List<Cell> column in grid)
         {
-            foreach(Cell cell in column)
+            foreach (Cell cell in column)
             {
                 if (!cell.IsSilhouetteValid())
                     return false;
             }
         }
         return true;
+    }
+
+    public List<List<Cell.FillValue>> GridFillValues(){
+        List<List<Cell.FillValue>> fillGrid = new List<List<Cell.FillValue>>();
+
+        foreach(List<Cell> column in grid)
+        {
+            List<Cell.FillValue> fillColumn = new List<Cell.FillValue>();
+            foreach (Cell cell in column)
+            {
+                fillColumn.Add(cell.CurrentFillValue);
+            }
+            fillGrid.Add(fillColumn);
+        }
+        return fillGrid;
+    }
+
+    public void RotateClockWise()
+    {
+        StartBatchOperation();
+        List<List<Cell.FillValue>> fillGrid = GridFillValues();
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                Cell.FillValue value = fillGrid[dimension - 1 - y][x];
+                if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
+                    grid[x][y].CurrentFillValue = value;
+                if (value == Cell.FillValue.TopLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopRight;
+                if (value == Cell.FillValue.TopRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomRight;
+                if (value == Cell.FillValue.BottomLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopLeft;
+                if (value == Cell.FillValue.BottomRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomLeft;
+            }
+        }
+        FinishBatchOperation();
+    }
+
+    public void MirrorTopBottom()
+    {
+        StartBatchOperation();
+        List<List<Cell.FillValue>> fillGrid = GridFillValues();
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                Cell.FillValue value = fillGrid[x][dimension - 1 - y];
+                if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
+                    grid[x][y].CurrentFillValue = value;
+                if (value == Cell.FillValue.TopLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomLeft;
+                if (value == Cell.FillValue.TopRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomRight;
+                if (value == Cell.FillValue.BottomLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopLeft;
+                if (value == Cell.FillValue.BottomRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopRight;
+            }
+        }
+        FinishBatchOperation();
+    }
+
+    public void MirrorLeftRight()
+    {
+        StartBatchOperation();
+        List<List<Cell.FillValue>> fillGrid = GridFillValues();
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                Cell.FillValue value = fillGrid[dimension - 1 - x][y];
+                if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
+                    grid[x][y].CurrentFillValue = value;
+                if (value == Cell.FillValue.TopLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopRight;
+                if (value == Cell.FillValue.TopRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.TopLeft;
+                if (value == Cell.FillValue.BottomLeft)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomRight;
+                if (value == Cell.FillValue.BottomRight)
+                    grid[x][y].CurrentFillValue = Cell.FillValue.BottomLeft;
+            }
+        }
+        FinishBatchOperation();
     }
 }
