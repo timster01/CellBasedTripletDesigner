@@ -179,19 +179,26 @@ public class CellGrid : MonoBehaviour
 
     public void SaveToFileDialog()
     {
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.DisableCamControl();
         FileBrowser.SetFilters(false, new string[] { ".shape" });
         FileBrowser.SetDefaultFilter(".shape");
         FileBrowser.ShowSaveDialog(SaveToFile, CancelFileDialog, FileBrowser.PickMode.Files);
+        
     }
 
     public void SaveToFile(string[] paths)
     {
         string serialized = SerializeGridFillValues();
         FileBrowserHelpers.WriteTextToFile(paths[0], serialized);
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.EnableCamControl();
     }
 
     public void LoadFromFileDialog()
     {
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.DisableCamControl();
         FileBrowser.SetFilters(false, new string[] { ".shape" });
         FileBrowser.SetDefaultFilter(".shape");
         FileBrowser.ShowLoadDialog(LoadFromFile, CancelFileDialog, FileBrowser.PickMode.Files);
@@ -201,11 +208,14 @@ public class CellGrid : MonoBehaviour
     {
         string serialized = FileBrowserHelpers.ReadTextFromFile(paths[0]);
         LoadFillValueList(DeserializeGridFillValues(serialized));
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.EnableCamControl();
     }
 
     public void CancelFileDialog()
     {
-
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.EnableCamControl();
     }
 
     public void MarkGraphId()

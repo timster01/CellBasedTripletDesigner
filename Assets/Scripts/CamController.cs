@@ -10,6 +10,7 @@ public class CamController : MonoBehaviour
     public Camera topCam;
 
     private bool allCams = true;
+    private bool allDisabled = false;
 
     // Start is called before the first frame update
     void Start()
@@ -25,8 +26,30 @@ public class CamController : MonoBehaviour
         }
     }
 
+    public void DisableCamControl()
+    {
+        allDisabled = true;
+        freeCam.gameObject.GetComponent<SelectorScript>().enabled = false;
+        freeCam.gameObject.GetComponent<FreeCam>().enabled = false;
+        topCam.gameObject.GetComponent<SelectorScript>().enabled = false;
+        sideCam.gameObject.GetComponent<SelectorScript>().enabled = false;
+        frontCam.gameObject.GetComponent<SelectorScript>().enabled = false;
+    }
+
+    public void EnableCamControl()
+    {
+        freeCam.gameObject.GetComponent<SelectorScript>().enabled = true;
+        freeCam.gameObject.GetComponent<FreeCam>().enabled = true;
+        topCam.gameObject.GetComponent<SelectorScript>().enabled = true;
+        sideCam.gameObject.GetComponent<SelectorScript>().enabled = true;
+        frontCam.gameObject.GetComponent<SelectorScript>().enabled = true;
+        allDisabled = false;
+    }
+
     public void ToggleCameraView()
     {
+        if (allDisabled)
+            return;
         if (allCams)
         {
             Rect freeCamRectCopy = freeCam.rect;
