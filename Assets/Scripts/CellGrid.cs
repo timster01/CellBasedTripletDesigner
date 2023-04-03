@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleFileBrowser;
 
 public class CellGrid : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class CellGrid : MonoBehaviour
     public bool testRot = false;
     public bool testTopBot = false;
     public bool testLR = false;
+    public bool testLoad = false;
+    public bool testSave = false;
 
     List<List<Cell>> grid;
     List<List<SilhouetteCell>> silhouetteGrid;
@@ -62,11 +65,6 @@ public class CellGrid : MonoBehaviour
         emptyCount = dimension * dimension;
     }
 
-    public bool IsEmpty()
-    {
-        return emptyCount == dimension * dimension;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -87,8 +85,23 @@ public class CellGrid : MonoBehaviour
             MirrorLeftRight();
             testLR = false;
         }
+
+        if (testLoad)
+        {
+            LoadFromFileDialog();
+            testLoad = false;
+        }
+        if (testSave)
+        {
+            SaveToFileDialog();
+            testSave = false;
+        }
     }
 
+    public bool IsEmpty()
+    {
+        return emptyCount == dimension * dimension;
+    }
     public Color GetGraphColor(int graphId)
     {
         for (int i = graphColors.Count; i <= graphId; i++)
@@ -162,6 +175,37 @@ public class CellGrid : MonoBehaviour
             graphs.Add(graph);
         }
         return graphs;
+    }
+
+    public void SaveToFileDialog()
+    {
+        FileBrowser.SetFilters(false, new string[] { ".shape" });
+        FileBrowser.SetDefaultFilter(".shape");
+        FileBrowser.ShowSaveDialog(SaveToFile, CancelFileDialog, FileBrowser.PickMode.Files);
+    }
+
+    public void SaveToFile(string[] paths)
+    {
+        string serialized = SerializeGridFillValues();
+        FileBrowserHelpers.WriteTextToFile(paths[0], serialized);
+    }
+
+    public void LoadFromFileDialog()
+    {
+        FileBrowser.SetFilters(false, new string[] { ".shape" });
+        FileBrowser.SetDefaultFilter(".shape");
+        FileBrowser.ShowLoadDialog(LoadFromFile, CancelFileDialog, FileBrowser.PickMode.Files);
+    }
+
+    public void LoadFromFile( string[] paths)
+    {
+        string serialized = FileBrowserHelpers.ReadTextFromFile(paths[0]);
+        LoadFillValueList(DeserializeGridFillValues(serialized));
+    }
+
+    public void CancelFileDialog()
+    {
+
     }
 
     public void MarkGraphId()
@@ -294,6 +338,80 @@ public class CellGrid : MonoBehaviour
             fillGrid.Add(fillColumn);
         }
         return fillGrid;
+    }
+
+    public string SerializeGridFillValues()
+    {
+        List<List<Cell.FillValue>> values = GridFillValues();
+        string result = "";
+        string fillValueString = "";
+        for (int y = 0; y < dimension; y++)
+        {
+            for (int x = 0; x < dimension; x++)
+            {
+                if (values[x][y] == Cell.FillValue.Full)
+                    fillValueString = "fu";
+                if (values[x][y] == Cell.FillValue.Empty)
+                    fillValueString = "em";
+                if (values[x][y] == Cell.FillValue.TopLeft)
+                    fillValueString = "tl";
+                if (values[x][y] == Cell.FillValue.TopRight)
+                    fillValueString = "tr";
+                if (values[x][y] == Cell.FillValue.BottomLeft)
+                    fillValueString = "bl";
+                if (values[x][y] == Cell.FillValue.BottomRight)
+                    fillValueString = "br";
+                if(x == dimension - 1)
+                    result = result + fillValueString;
+                else
+                    result = result + fillValueString + " ";
+            }
+            if(y < dimension - 1)
+                result += System.Environment.NewLine;
+        }
+        return result;
+    }
+
+    public List<List<Cell.FillValue>> DeserializeGridFillValues(string serialized)
+    {
+        List<List<Cell.FillValue>> result = new List<List<Cell.FillValue>>();
+        List<Cell.FillValue> column;
+        string[] lines = serialized.Split(System.Environment.NewLine);
+        List<string[]> values = new List<string[]>();
+        foreach (string line in lines)
+            values.Add(line.Split(" "));
+        for (int x = 0; x < dimension; x++)
+        {
+            column = new List<Cell.FillValue>();
+            for (int y = 0; y < dimension; y++)
+            {
+                if (values[y][x] == "fu")
+                    column.Add(Cell.FillValue.Full);
+                if (values[y][x] == "em")
+                    column.Add(Cell.FillValue.Empty);
+                if (values[y][x] == "tl")
+                    column.Add(Cell.FillValue.TopLeft);
+                if (values[y][x] == "tr")
+                    column.Add(Cell.FillValue.TopRight);
+                if (values[y][x] == "bl")
+                    column.Add(Cell.FillValue.BottomLeft);
+                if (values[y][x] == "br")
+                    column.Add(Cell.FillValue.BottomRight);
+            }
+            result.Add(column);
+        }
+        return result;
+    }
+
+    public void LoadFillValueList(List<List<Cell.FillValue>> list)
+    {
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                grid[x][y].CurrentFillValue = list[x][y];
+            }
+        }
     }
 
     public void RotateClockWise()
