@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using SimpleFileBrowser;
 
@@ -353,7 +354,7 @@ public class CellGrid : MonoBehaviour
     public string SerializeGridFillValues()
     {
         List<List<Cell.FillValue>> values = GridFillValues();
-        string result = "";
+        StringBuilder result = new StringBuilder("", dimension*(dimension*3 + System.Environment.NewLine.Length));
         string fillValueString = "";
         for (int y = 0; y < dimension; y++)
         {
@@ -372,14 +373,14 @@ public class CellGrid : MonoBehaviour
                 if (values[x][y] == Cell.FillValue.BottomRight)
                     fillValueString = "br";
                 if(x == dimension - 1)
-                    result = result + fillValueString;
+                    result.Append(fillValueString);
                 else
-                    result = result + fillValueString + " ";
+                    result.Append(fillValueString + " ");
             }
             if(y < dimension - 1)
-                result += System.Environment.NewLine;
+                result.Append(System.Environment.NewLine);
         }
-        return result;
+        return result.ToString();
     }
 
     public List<List<Cell.FillValue>> DeserializeGridFillValues(string serialized)

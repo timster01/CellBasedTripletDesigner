@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Clipper2Lib;
+using SimpleFileBrowser;
+using System.Text;
 
 public class VoxelGrid : MonoBehaviour
 {
@@ -57,7 +59,8 @@ public class VoxelGrid : MonoBehaviour
         if (test)
         {
             test = false;
-            MergeVoxels();
+            DisplayCombinedMesh();
+            SaveToFileDialog();
         }
 
         if (!test2)
@@ -69,6 +72,49 @@ public class VoxelGrid : MonoBehaviour
             Debug.Log("Triplet is not connected");
 
         test2 = false;
+    }
+
+    public void SaveToFileDialog()
+    {
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.DisableCamControl();
+        FileBrowser.SetFilters(false, new string[] { ".obj" });
+        FileBrowser.SetDefaultFilter(".obj");
+        FileBrowser.ShowSaveDialog(SaveToFile, CancelFileDialog, FileBrowser.PickMode.Files);
+
+    }
+
+    public void SaveToFile(string[] paths)
+    {
+        string objString = GenerateObjString();
+        FileBrowserHelpers.WriteTextToFile(paths[0], objString);
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.EnableCamControl();
+    }
+
+    public void CancelFileDialog()
+    {
+        CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
+        controller.EnableCamControl();
+    }
+
+    public string GenerateObjString(string tripletName = "triplet")
+    {
+        //TODO: fix validity
+        
+        Mesh mesh = GenerateCombinedMesh();
+        int expectedLength = mesh.vertexCount * (4 + System.Environment.NewLine.Length + 40) + mesh.triangles.Length * (4 + mesh.triangles.Length.ToString().Length + System.Environment.NewLine.Length) + tripletName.Length;
+        StringBuilder result = new StringBuilder($"o {tripletName}{System.Environment.NewLine}", expectedLength);
+        foreach (Vector3 vertex in mesh.vertices)
+        {
+            result.Append($"v {vertex.x} {vertex.y} {vertex.z}{System.Environment.NewLine}");
+        }
+
+        for (int i = 0; i < mesh.triangles.Length; i+=3)
+        {
+            result.Append($"f {mesh.triangles[i]} {mesh.triangles[i + 1]} {mesh.triangles[i + 2]}{System.Environment.NewLine}");
+        }
+        return result.ToString();
     }
 
     public Color GetGraphColor(int graphId)
@@ -361,12 +407,9 @@ public class VoxelGrid : MonoBehaviour
     }
 
 
-    public void MergeVoxels()
+    public Mesh GenerateCombinedMesh()
     {
         //https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html
-        
-        combinedMesh.transform.localPosition = new Vector3(-dimension - 3,0,0);
-
         MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
         int b = 0;
         int length = 0;
@@ -384,7 +427,7 @@ public class VoxelGrid : MonoBehaviour
         int c = 0;
         while (i < meshFilters.Length)
         {
-            if(meshFilters[i].sharedMesh != null)
+            if (meshFilters[i].sharedMesh != null)
             {
                 combine[c].mesh = meshFilters[i].sharedMesh;
                 combine[c].transform = meshFilters[i].transform.localToWorldMatrix;
@@ -392,9 +435,16 @@ public class VoxelGrid : MonoBehaviour
             }
             i++;
         }
+        Mesh result = new Mesh();
+        result.CombineMeshes(combine);
+        return result;
+    }
+
+    public void DisplayCombinedMesh()
+    {
+        combinedMesh.transform.localPosition = new Vector3(-dimension - 3, 0, 0);
         combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
-        combinedMesh.GetComponent<MeshFilter>().mesh = new Mesh();
-        combinedMesh.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+        combinedMesh.GetComponent<MeshFilter>().mesh = GenerateCombinedMesh();
         combinedMesh.gameObject.SetActive(true);
     }
 }
