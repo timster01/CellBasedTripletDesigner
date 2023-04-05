@@ -99,20 +99,19 @@ public class VoxelGrid : MonoBehaviour
     }
 
     public string GenerateObjString(string tripletName = "triplet")
-    {
-        //TODO: fix validity
-        
+    {   
+        //TODO: check why output still seems slightly bugged, one missing triangle
         Mesh mesh = GenerateCombinedMesh();
-        int expectedLength = mesh.vertexCount * (4 + System.Environment.NewLine.Length + 40) + mesh.triangles.Length * (4 + mesh.triangles.Length.ToString().Length + System.Environment.NewLine.Length) + tripletName.Length;
+        int expectedLength = mesh.vertexCount * (4 + System.Environment.NewLine.Length + 20) + mesh.triangles.Length * (4 + mesh.triangles.Length.ToString().Length + System.Environment.NewLine.Length) + tripletName.Length;
         StringBuilder result = new StringBuilder($"o {tripletName}{System.Environment.NewLine}", expectedLength);
         foreach (Vector3 vertex in mesh.vertices)
         {
-            result.Append($"v {vertex.x} {vertex.y} {vertex.z}{System.Environment.NewLine}");
+            result.Append($"v {vertex.x.ToString("F10")} {vertex.y.ToString("F10")} {vertex.z.ToString("F10")}{System.Environment.NewLine}");
         }
 
         for (int i = 0; i < mesh.triangles.Length; i+=3)
         {
-            result.Append($"f {mesh.triangles[i]} {mesh.triangles[i + 1]} {mesh.triangles[i + 2]}{System.Environment.NewLine}");
+            result.Append($"f {mesh.triangles[i] + 1} {mesh.triangles[i + 1] + 1} {mesh.triangles[i + 2] + 1}{System.Environment.NewLine}");
         }
         return result.ToString();
     }
@@ -409,11 +408,23 @@ public class VoxelGrid : MonoBehaviour
 
     public Mesh GenerateCombinedMesh()
     {
+        //TODO: remove duplicate and internal faces
         //https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+
+        List<MeshFilter> meshFilters = new List<MeshFilter>();
+        for (int x = 0; x < dimension; x++)
+        {
+            for (int y = 0; y < dimension; y++)
+            {
+                for (int z = 0; z < dimension; z++)
+                {
+                    meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+                }
+            }
+        }
         int b = 0;
         int length = 0;
-        while (b < meshFilters.Length)
+        while (b < meshFilters.Count)
         {
             if (meshFilters[b].sharedMesh != null)
             {
@@ -425,7 +436,7 @@ public class VoxelGrid : MonoBehaviour
 
         int i = 0;
         int c = 0;
-        while (i < meshFilters.Length)
+        while (i < meshFilters.Count)
         {
             if (meshFilters[i].sharedMesh != null)
             {
