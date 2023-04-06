@@ -23,7 +23,7 @@ public class SelectorScript : MonoBehaviour
             {
                 // the object identified by hit.transform was clicked
                 // do whatever you want
-                hit.collider.GetComponentInParent<Cell>().CycleFillValue();
+                hit.collider.GetComponentInParent<ClickReceiver>().OnClick();
             }
         }
     }
