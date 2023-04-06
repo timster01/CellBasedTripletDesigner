@@ -59,7 +59,6 @@ public class VoxelGrid : MonoBehaviour
         if (test)
         {
             test = false;
-            DisplayCombinedMesh();
             SaveToFileDialog();
         }
 
@@ -139,6 +138,7 @@ public class VoxelGrid : MonoBehaviour
             parent.topCellGrid.UpdateSilhouetteCell(i, z);
         }
         MarkGraphId();
+        DisplayCombinedMesh();
     }
 
     public void UpdateVoxelColumnY(int x, int z)
@@ -154,6 +154,7 @@ public class VoxelGrid : MonoBehaviour
             parent.frontCellGrid.UpdateSilhouetteCell(x, i);
         }
         MarkGraphId();
+        DisplayCombinedMesh();
     }
 
     public void UpdateVoxelColumnZ(int x, int y)
@@ -169,6 +170,7 @@ public class VoxelGrid : MonoBehaviour
             parent.topCellGrid.UpdateSilhouetteCell(x, i);
         }
         MarkGraphId();
+        DisplayCombinedMesh();
     }
 
     public void UpdateAllVoxels()
@@ -179,10 +181,11 @@ public class VoxelGrid : MonoBehaviour
                 {
                     grid[x][y][z].UpdateVoxel();
                 }
-        MarkGraphId();
         parent.frontCellGrid.UpdateAllSilhouetteCells();
         parent.sideCellGrid.UpdateAllSilhouetteCells();
         parent.topCellGrid.UpdateAllSilhouetteCells();
+        MarkGraphId();
+        DisplayCombinedMesh();
     }
 
     public Voxel GetVoxelAtCoords(int x, int y, int z)
@@ -453,7 +456,7 @@ public class VoxelGrid : MonoBehaviour
 
     public void DisplayCombinedMesh()
     {
-        combinedMesh.transform.localPosition = new Vector3(-dimension - 3, 0, 0);
+        combinedMesh.transform.localPosition = new Vector3(-dimension - 10, 0, 0);
         combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
         combinedMesh.GetComponent<MeshFilter>().mesh = GenerateCombinedMesh();
         combinedMesh.gameObject.SetActive(true);
