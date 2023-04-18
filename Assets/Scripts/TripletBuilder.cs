@@ -23,6 +23,8 @@ public class TripletBuilder : MonoBehaviour
     int validResults = 0;
     int connectedResults = 0;
     int validConnectedResults = 0;
+    int shapeSets = 0;
+    int validAndConnectedShapeSets = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -114,6 +116,8 @@ public class TripletBuilder : MonoBehaviour
         validResults = 0;
         connectedResults = 0;
         validConnectedResults = 0;
+        shapeSets = 0;
+        validAndConnectedShapeSets = 0;
         List<List<Cell.FillValue>> frontBackup = frontCellGrid.GridFillValues();
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
@@ -121,7 +125,7 @@ public class TripletBuilder : MonoBehaviour
         int rdegsFront, rdegsSide, rdegsTop;
         bool xmirFront, xmirSide, xmirTop;
         bool ymirFront, ymirSide, ymirTop;
-
+        string filename;
         foreach (FileSystemEntry fileFront in files)
         {
             if (fileFront.Extension != ".shape")
@@ -140,6 +144,8 @@ public class TripletBuilder : MonoBehaviour
                     rdegsFront = 0;
                     xmirFront = xmirSide = xmirTop = false;
                     ymirFront = ymirSide = ymirTop = false;
+                    bool newShapeSet = true;
+                    shapeSets++;
                     for (int rotFront = 0; rotFront < 4; rotFront++)
                     {
                         rdegsSide = 0;
@@ -154,9 +160,33 @@ public class TripletBuilder : MonoBehaviour
                                     {
                                         for (int mirTop = 0; mirTop < 3; mirTop++)
                                         {
-                                            SaveValidConnectedResult(savePath, $"{fileFront.Name[0]}_r{rdegsFront}{(xmirFront ? "_xmir" : "")}{(ymirFront ? "_ymir" : "")}" +
+                                            filename = $"{fileFront.Name[0]}_r{rdegsFront}{(xmirFront ? "_xmir" : "")}{(ymirFront ? "_ymir" : "")}" +
                                                 $"{fileSide.Name[0]}_r{rdegsSide}{(xmirSide ? "_xmir" : "")}{(ymirSide ? "_ymir" : "")}"+
-                                                $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}");
+                                                $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
+
+                                            results++;
+                                            if (!IsSilhouetteValid())
+                                            {
+                                                connectedResults += IsTripletConnected() ? 1 : 0;
+
+                                            }
+                                            else
+                                            {
+                                                validResults++;
+                                                if (IsTripletConnected())
+                                                {
+                                                    connectedResults++;
+                                                    validConnectedResults++;
+                                                    if(newShapeSet)
+                                                    {
+                                                        newShapeSet = false;
+                                                        validAndConnectedShapeSets++;
+                                                    }
+                                                    voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}.obj" });
+                                                }   
+                                            }
+                                            
+
 
                                             if (!xmirTop && !ymirTop)
                                             {
@@ -228,24 +258,10 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid.LoadFillValueList(frontBackup);
         sideCellGrid.LoadFillValueList(sideBackup);
         topCellGrid.LoadFillValueList(topBackup);
+        Debug.Log($"{results}:{validResults}:{connectedResults}:{validConnectedResults}");
+        Debug.Log($"{shapeSets}:{validAndConnectedShapeSets}");
     }
 
-    public void SaveValidConnectedResult(string savePath, string filename)
-    {
-        results++;
-        if (!IsSilhouetteValid())
-        {
-            connectedResults += IsTripletConnected() ? 1 : 0;
-            return;
-        }
-        validResults++;
-        if(!IsTripletConnected())
-            return;
-        connectedResults++;
-        validConnectedResults++;
-
-        voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}.obj" });
-    }
 
     public IEnumerator GetPaths()
     {
