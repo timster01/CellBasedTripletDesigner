@@ -321,7 +321,7 @@ public class CellGrid : MonoBehaviour
         MarkGraphId();
     }
 
-    public bool IsSilhouetteValid()
+    public bool IsSilhouetteValid(int graphId = -1)
     {
         if (IsEmpty())
             return true;
@@ -329,7 +329,7 @@ public class CellGrid : MonoBehaviour
         {
             foreach (Cell cell in column)
             {
-                if (!cell.IsSilhouetteValid())
+                if (!cell.IsSilhouetteValid(graphId))
                     return false;
             }
         }

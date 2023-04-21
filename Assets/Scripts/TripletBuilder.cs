@@ -94,9 +94,9 @@ public class TripletBuilder : MonoBehaviour
         test = false;
     }
 
-    public bool IsSilhouetteValid()
+    public bool IsSilhouetteValid(int graphId = -1)
     {
-        return frontCellGrid.IsSilhouetteValid() && topCellGrid.IsSilhouetteValid() && sideCellGrid.IsSilhouetteValid() ;
+        return frontCellGrid.IsSilhouetteValid(graphId) && topCellGrid.IsSilhouetteValid(graphId) && sideCellGrid.IsSilhouetteValid(graphId) ;
     }
 
     public bool IsTripletConnected()
@@ -165,6 +165,7 @@ public class TripletBuilder : MonoBehaviour
                                                 $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
 
                                             results++;
+                                            //TODO: run this for every graph id and only output that 3D subgraph
                                             if (!IsSilhouetteValid())
                                             {
                                                 connectedResults += IsTripletConnected() ? 1 : 0;

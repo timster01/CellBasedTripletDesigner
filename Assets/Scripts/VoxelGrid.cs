@@ -20,6 +20,8 @@ public class VoxelGrid : MonoBehaviour
     List<List<List<Voxel>>> grid;
     List<Color> graphColors;
 
+    public int nrOfGraphs = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -269,6 +271,7 @@ public class VoxelGrid : MonoBehaviour
             }
             i++;
         }
+        nrOfGraphs = i;
     }
 
     public bool IsTripletConnected()
