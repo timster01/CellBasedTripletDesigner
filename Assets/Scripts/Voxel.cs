@@ -209,6 +209,7 @@ public class Voxel : MonoBehaviour
     }
 }
 
+//TODO: move triangle structs to different files
 public struct Triangle
 {
     public Vector3 coord1, coord2, coord3;
