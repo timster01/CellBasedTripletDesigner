@@ -13,10 +13,6 @@ public class VoxelGrid : MonoBehaviour
     public TripletBuilder parent;
     public GameObject combinedMesh;
 
-    //TODO: replace by button
-    public bool test = false;
-    public bool test2 = false;
-
     List<List<List<Voxel>>> grid;
     List<Color> graphColors;
 
@@ -58,21 +54,6 @@ public class VoxelGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (test)
-        {
-            test = false;
-            SaveToFileDialog();
-        }
-
-        if (!test2)
-            return;
-
-        if (IsTripletConnected())
-            Debug.Log("Triplet is connected");
-        else
-            Debug.Log("Triplet is not connected");
-
-        test2 = false;
     }
 
     public void SaveToFileDialog()

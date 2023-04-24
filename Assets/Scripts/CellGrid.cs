@@ -13,11 +13,6 @@ public class CellGrid : MonoBehaviour
     public TripletBuilder parent;
     public enum CellGridAngle { Front, Side, Top }
     public CellGridAngle cellGridAngle;
-    public bool testRot = false;
-    public bool testTopBot = false;
-    public bool testLR = false;
-    public bool testLoad = false;
-    public bool testSave = false;
 
     List<List<Cell>> grid;
     List<List<SilhouetteCell>> silhouetteGrid;
@@ -69,34 +64,6 @@ public class CellGrid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (testRot)
-        {
-            RotateClockWise();
-            testRot = false;
-        }
-
-        if (testTopBot)
-        {
-            MirrorTopBottom();
-            testTopBot = false;
-        }
-
-        if (testLR)
-        {
-            MirrorLeftRight();
-            testLR = false;
-        }
-
-        if (testLoad)
-        {
-            LoadFromFileDialog();
-            testLoad = false;
-        }
-        if (testSave)
-        {
-            SaveToFileDialog();
-            testSave = false;
-        }
     }
 
     public bool IsEmpty()
