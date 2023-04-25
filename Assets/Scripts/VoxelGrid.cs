@@ -17,6 +17,8 @@ public class VoxelGrid : MonoBehaviour
     List<Color> graphColors;
 
     public int nrOfGraphs = 0;
+    //TODO: make toggleable using a button
+    public bool autoDisplayCombinedMesh = true;
 
     // Start is called before the first frame update
     void Start()
@@ -68,7 +70,12 @@ public class VoxelGrid : MonoBehaviour
 
     public void SaveToFile(string[] paths)
     {
-        string objString = GenerateObjString();
+        SaveToFile(paths, -1);
+    }
+
+    public void SaveToFile(string[] paths, int graphId)
+    {
+        string objString = GenerateObjString(graphId: graphId);
         FileBrowserHelpers.WriteTextToFile(paths[0], objString);
         CamController controller = GameObject.Find("CamController").GetComponent<CamController>();
         controller.EnableCamControl();
@@ -80,10 +87,9 @@ public class VoxelGrid : MonoBehaviour
         controller.EnableCamControl();
     }
 
-    public string GenerateObjString(string tripletName = "triplet")
+    public string GenerateObjString(string tripletName = "triplet", int graphId = -1)
     {   
-        //TODO: check why output still seems slightly bugged, one missing triangle
-        Mesh mesh = GenerateCombinedMesh();
+        Mesh mesh = GenerateCombinedMesh(graphId);
         int expectedLength = mesh.vertexCount * (4 + System.Environment.NewLine.Length + 20) + mesh.triangles.Length * (4 + mesh.triangles.Length.ToString().Length + System.Environment.NewLine.Length) + tripletName.Length;
         StringBuilder result = new StringBuilder($"o {tripletName}{System.Environment.NewLine}", expectedLength);
         foreach (Vector3 vertex in mesh.vertices)
@@ -393,19 +399,26 @@ public class VoxelGrid : MonoBehaviour
     }
 
 
-    public Mesh GenerateCombinedMesh()
+    public Mesh GenerateCombinedMesh(int graphId = -1)
     {
-        //TODO: remove duplicate and internal faces
+        //TODO: remove duplicate vertices
+        //Can probably be done by removing all faces fully in the voxel face with a connencted voxel through that face
         //https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html
 
         List<MeshFilter> meshFilters = new List<MeshFilter>();
+        List<Voxel> voxels = new List<Voxel>();
         for (int x = 0; x < dimension; x++)
         {
             for (int y = 0; y < dimension; y++)
             {
                 for (int z = 0; z < dimension; z++)
                 {
-                    meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+                    if(graphId == -1 || graphId == grid[x][y][z].graphId)
+                    {
+                        meshFilters.Add(grid[x][y][z].childShape.GetComponent<MeshFilter>());
+                        voxels.Add(grid[x][y][z]);
+                    }
+                        
                 }
             }
         }
@@ -421,13 +434,14 @@ public class VoxelGrid : MonoBehaviour
         }
         CombineInstance[] combine = new CombineInstance[length];
 
+
         int i = 0;
         int c = 0;
         while (i < meshFilters.Count)
         {
             if (meshFilters[i].sharedMesh != null)
             {
-                combine[c].mesh = meshFilters[i].sharedMesh;
+                combine[c].mesh = CutConnectionFaces(meshFilters[i].sharedMesh, voxels[i]);
                 combine[c].transform = meshFilters[i].transform.localToWorldMatrix;
                 c++;
             }
@@ -435,13 +449,86 @@ public class VoxelGrid : MonoBehaviour
         }
         Mesh result = new Mesh();
         result.CombineMeshes(combine);
+        //TODO: fix graphics
+        List<Color> colors = new List<Color>();
+        for (i = 0; i < result.vertices.Length; i++)
+        {
+            colors.Add(new Color(1, 1, 1));
+        }
+        result.SetColors(colors);
         return result;
+    }
+
+    public Mesh CutConnectionFaces(Mesh input, Voxel voxel)
+    {
+        List<int> newTriangles = new List<int>();
+        bool up = voxel.y != dimension - 1 && voxel.graphId == grid[voxel.x][voxel.y + 1][voxel.z].graphId;
+        bool down = voxel.y != 0 && voxel.graphId == grid[voxel.x][voxel.y - 1][voxel.z].graphId;
+        bool left = voxel.x != 0 && voxel.graphId == grid[voxel.x - 1][voxel.y][voxel.z].graphId;
+        bool right = voxel.x != dimension - 1 && voxel.graphId == grid[voxel.x + 1][voxel.y][voxel.z].graphId;
+        bool back = voxel.z != dimension - 1 && voxel.graphId == grid[voxel.x][voxel.y][voxel.z + 1].graphId;
+        bool front = voxel.z != 0 && voxel.graphId == grid[voxel.x][voxel.y][voxel.z - 1].graphId;
+        bool remove;
+        for (int i = 0; i < input.triangles.Length; i+=3)
+        {
+            remove = false;
+            remove = remove || (up && input.vertices[input.triangles[i]].y == 0.5f &&
+                input.vertices[input.triangles[i + 1]].y == 0.5f &&
+                input.vertices[input.triangles[i + 2]].y == 0.5f);
+            remove = remove || (down && input.vertices[input.triangles[i]].y == -0.5f &&
+                input.vertices[input.triangles[i + 1]].y == -0.5f &&
+                input.vertices[input.triangles[i + 2]].y == -0.5f);
+            remove = remove || (left && input.vertices[input.triangles[i]].x == -0.5f &&
+                input.vertices[input.triangles[i + 1]].x == -0.5f &&
+                input.vertices[input.triangles[i + 2]].x == -0.5f);
+            remove = remove || (right && input.vertices[input.triangles[i]].x == 0.5f &&
+                input.vertices[input.triangles[i + 1]].x == 0.5f &&
+                input.vertices[input.triangles[i + 2]].x == 0.5f);
+            remove = remove || (front && input.vertices[input.triangles[i]].z == -0.5f &&
+                input.vertices[input.triangles[i + 1]].z == -0.5f &&
+                input.vertices[input.triangles[i + 2]].z == -0.5f);
+            remove = remove || (back && input.vertices[input.triangles[i]].z == 0.5f &&
+                input.vertices[input.triangles[i + 1]].z == 0.5f &&
+                input.vertices[input.triangles[i + 2]].z == 0.5f);
+            Debug.Log("hello");
+            if (remove)
+                Debug.Log("removed something");
+            if (!remove)
+            {
+                newTriangles.Add(input.triangles[i]);
+                newTriangles.Add(input.triangles[i+1]);
+                newTriangles.Add(input.triangles[i+2]);
+            }
+        }
+        Mesh output = new Mesh();
+        List<Vector3> newVertices = new List<Vector3>();
+        newVertices.AddRange(input.vertices);
+        for (int i = 0; i < newVertices.Count; i++)
+        {
+            if (!newTriangles.Contains(i))
+            {
+                newVertices.RemoveAt(i);
+                for (int j = 0; j < newTriangles.Count; j++)
+                {
+                    if (newTriangles[j] > i)
+                        newTriangles[j]--;
+                }
+                i--;
+            }
+                
+        }
+        output.SetVertices(newVertices.ToArray());
+        output.SetTriangles(newTriangles.ToArray(), 0);
+        return output;
     }
 
     public void DisplayCombinedMesh()
     {
+        
         combinedMesh.transform.localPosition = new Vector3(-dimension - 10, 0, 0);
         combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
+        if (!autoDisplayCombinedMesh)
+            return;
         combinedMesh.GetComponent<MeshFilter>().mesh = GenerateCombinedMesh();
         combinedMesh.gameObject.SetActive(true);
     }

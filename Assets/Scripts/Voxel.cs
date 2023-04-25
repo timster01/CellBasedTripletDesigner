@@ -21,10 +21,11 @@ public class Voxel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        childShape.GetComponent<MeshRenderer>().material.color = parent.GetGraphColor(graphId);
+        if(graphId != -1)
+            childShape.GetComponent<MeshRenderer>().material.color = parent.GetGraphColor(graphId);
     }
 
-    private bool IsConnectedUp()
+    public bool IsConnectedUp()
     {
         if (y == parent.dimension - 1)
             return false;
@@ -60,7 +61,7 @@ public class Voxel : MonoBehaviour
         return false;
     }
 
-    private bool IsConnectedDown()
+    public bool IsConnectedDown()
     {
         if (y == 0)
             return false;
@@ -68,7 +69,7 @@ public class Voxel : MonoBehaviour
         return adjacentVoxel.IsConnectedUp();
     }
 
-    private bool IsConnectedRight()
+    public bool IsConnectedRight()
     {
         if (x == parent.dimension - 1)
             return false;
@@ -103,7 +104,7 @@ public class Voxel : MonoBehaviour
 
         return false;
     }
-    private bool IsConnectedLeft()
+    public bool IsConnectedLeft()
     {
         if (x == 0)
             return false;
@@ -111,7 +112,7 @@ public class Voxel : MonoBehaviour
         return adjacentVoxel.IsConnectedRight();
     }
 
-    private bool IsConnectedBack()
+    public bool IsConnectedBack()
     {
         if (z == parent.dimension - 1)
             return false;
@@ -146,7 +147,7 @@ public class Voxel : MonoBehaviour
 
         return false;
     }
-    private bool IsConnectedFront()
+    public bool IsConnectedFront()
     {
         if (z == 0)
             return false;
@@ -201,8 +202,10 @@ public class Voxel : MonoBehaviour
     void SetVoxel(Cell.FillValue frontFillValue, Cell.FillValue sideFillValue, Cell.FillValue topFillValue)
     {
         if (frontFillValue == Cell.FillValue.Empty || sideFillValue == Cell.FillValue.Empty || topFillValue == Cell.FillValue.Empty)
+        {
             childShape.GetComponent<MeshFilter>().mesh.Clear();
-
+            graphId = -1;
+        }
         string objPath = $"{frontFillValue.ToString()}-{sideFillValue.ToString()}-{topFillValue.ToString()}";
         Mesh mesh = Resources.Load<Mesh>(objPath);
         childShape.GetComponent<MeshFilter>().mesh = mesh;

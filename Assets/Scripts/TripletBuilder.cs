@@ -25,6 +25,8 @@ public class TripletBuilder : MonoBehaviour
     int validConnectedResults = 0;
     int shapeSets = 0;
     int validAndConnectedShapeSets = 0;
+    int validConnectedSubGraphs = 0;
+    int validConnectedShapeSetSubGraphs = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -109,8 +111,7 @@ public class TripletBuilder : MonoBehaviour
         StartCoroutine(GetPaths());
     }
 
-
-    public void RunTestSet(string dataPath, string savePath)
+    public void ResetResultValues()
     {
         results = 0;
         validResults = 0;
@@ -118,6 +119,14 @@ public class TripletBuilder : MonoBehaviour
         validConnectedResults = 0;
         shapeSets = 0;
         validAndConnectedShapeSets = 0;
+        validConnectedSubGraphs = 0;
+        validConnectedShapeSetSubGraphs = 0;
+    }
+
+    public void RunTestSet(string dataPath, string savePath)
+    {
+        ResetResultValues();
+        voxelGrid.autoDisplayCombinedMesh = false;
         List<List<Cell.FillValue>> frontBackup = frontCellGrid.GridFillValues();
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
@@ -125,6 +134,7 @@ public class TripletBuilder : MonoBehaviour
         int rdegsFront, rdegsSide, rdegsTop;
         bool xmirFront, xmirSide, xmirTop;
         bool ymirFront, ymirSide, ymirTop;
+        bool validGraphSilhouetteFound;
         string filename;
         foreach (FileSystemEntry fileFront in files)
         {
@@ -145,6 +155,7 @@ public class TripletBuilder : MonoBehaviour
                     xmirFront = xmirSide = xmirTop = false;
                     ymirFront = ymirSide = ymirTop = false;
                     bool newShapeSet = true;
+                    bool newShapeSetSubgraph = true;
                     shapeSets++;
                     for (int rotFront = 0; rotFront < 4; rotFront++)
                     {
@@ -165,7 +176,7 @@ public class TripletBuilder : MonoBehaviour
                                                 $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
 
                                             results++;
-                                            //TODO: run this for every graph id and only output that 3D subgraph
+                                            
                                             if (!IsSilhouetteValid())
                                             {
                                                 connectedResults += IsTripletConnected() ? 1 : 0;
@@ -182,9 +193,36 @@ public class TripletBuilder : MonoBehaviour
                                                     {
                                                         newShapeSet = false;
                                                         validAndConnectedShapeSets++;
+                                                        if (newShapeSetSubgraph)
+                                                        {
+                                                            newShapeSetSubgraph = false;
+                                                            validConnectedShapeSetSubGraphs++;
+                                                        }
                                                     }
                                                     voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}.obj" });
-                                                }   
+                                                }
+                                                else
+                                                {
+                                                    validGraphSilhouetteFound = false;
+                                                    for (int i = 0; i < voxelGrid.nrOfGraphs; i++)
+                                                    {
+                                                        if (IsSilhouetteValid(i))
+                                                        {
+                                                            validGraphSilhouetteFound = true;
+                                                            voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}subgraph{i}.obj" }, i);
+                                                        }
+                                                    }
+                                                    
+                                                    if (validGraphSilhouetteFound)
+                                                    {
+                                                        validConnectedSubGraphs++;
+                                                        if (newShapeSetSubgraph && newShapeSet)
+                                                        {
+                                                            newShapeSetSubgraph = false;
+                                                            validConnectedShapeSetSubGraphs++;
+                                                        }
+                                                    }
+                                                }
                                             }
                                             
 
@@ -259,6 +297,7 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid.LoadFillValueList(frontBackup);
         sideCellGrid.LoadFillValueList(sideBackup);
         topCellGrid.LoadFillValueList(topBackup);
+        voxelGrid.autoDisplayCombinedMesh = true;
         Debug.Log($"{results}:{validResults}:{connectedResults}:{validConnectedResults}");
         Debug.Log($"{shapeSets}:{validAndConnectedShapeSets}");
     }
