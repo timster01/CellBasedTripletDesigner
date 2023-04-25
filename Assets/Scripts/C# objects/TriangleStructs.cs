@@ -172,7 +172,7 @@ public struct Triangle2D
             float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
             float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
 
-            //TODO: check if this happens when triangles only touch but don't overlap
+            //TODO: check if this happens when triangles only touch but don't overlap, probably but doesn't seem to matter for this use case
             //Is intersecting if u_a and u_b are between 0 and 1
             if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1)
             {
@@ -195,7 +195,7 @@ public struct Triangle2D
         float b = ((this.coord3.y - this.coord1.y) * (p.x - this.coord3.x) + (this.coord1.x - this.coord3.x) * (p.y - this.coord3.y)) / denominator;
         float c = 1 - a - b;
 
-        //TODO: check if this happens when triangles only touch but don't overlap
+        //TODO: check if this happens when triangles only touch but don't overlap, probably but doesn't seem to matter for this use case
         //The point is within the triangle if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1
         if (a >= 0f && a <= 1f && b >= 0f && b <= 1f && c >= 0f && c <= 1f)
         {
