@@ -28,6 +28,10 @@ public class TripletBuilder : MonoBehaviour
     int validConnectedSubGraphs = 0;
     int validConnectedShapeSetSubGraphs = 0;
 
+    //TODO: make toggleable using a button, maybe
+    public bool autoDisplaySilhouetteCells = true;
+    public bool autoDisplayCombinedMesh = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -126,7 +130,11 @@ public class TripletBuilder : MonoBehaviour
     public void RunTestSet(string dataPath, string savePath)
     {
         ResetResultValues();
-        voxelGrid.autoDisplayCombinedMesh = false;
+        bool currentAutoDisplayMeshValue = autoDisplayCombinedMesh;
+        autoDisplayCombinedMesh = false;
+        bool currentAutoDisplaySilhouetteCellsValue = autoDisplaySilhouetteCells;
+        autoDisplaySilhouetteCells = false;
+
         List<List<Cell.FillValue>> frontBackup = frontCellGrid.GridFillValues();
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
@@ -185,7 +193,7 @@ public class TripletBuilder : MonoBehaviour
                                             else
                                             {
                                                 validResults++;
-                                                if (IsTripletConnected())
+                                                if (voxelGrid.nrOfGraphs == 1) //IsTripletConnected()
                                                 {
                                                     connectedResults++;
                                                     validConnectedResults++;
@@ -294,10 +302,11 @@ public class TripletBuilder : MonoBehaviour
             }
         }
 
+        autoDisplayCombinedMesh = currentAutoDisplayMeshValue;
+        autoDisplaySilhouetteCells = currentAutoDisplaySilhouetteCellsValue;
         frontCellGrid.LoadFillValueList(frontBackup);
         sideCellGrid.LoadFillValueList(sideBackup);
         topCellGrid.LoadFillValueList(topBackup);
-        voxelGrid.autoDisplayCombinedMesh = true;
         Debug.Log($"{results}:{validResults}:{connectedResults}:{validConnectedResults}");
         Debug.Log($"{shapeSets}:{validAndConnectedShapeSets}");
     }

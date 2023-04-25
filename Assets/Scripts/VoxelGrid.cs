@@ -17,8 +17,8 @@ public class VoxelGrid : MonoBehaviour
     List<Color> graphColors;
 
     public int nrOfGraphs = 0;
-    //TODO: make toggleable using a button
-    public bool autoDisplayCombinedMesh = true;
+    
+    
 
     // Start is called before the first frame update
     void Start()
@@ -523,7 +523,7 @@ public class VoxelGrid : MonoBehaviour
         
         combinedMesh.transform.localPosition = new Vector3(-dimension - 10, 0, 0);
         combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
-        if (!autoDisplayCombinedMesh)
+        if (!parent.autoDisplayCombinedMesh)
             return;
         combinedMesh.GetComponent<MeshFilter>().mesh = GenerateCombinedMesh();
         combinedMesh.gameObject.SetActive(true);

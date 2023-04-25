@@ -22,6 +22,7 @@ public class CellGrid : MonoBehaviour
     public int emptyCount;
     private bool runningBatchOperation = false;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -245,7 +246,8 @@ public class CellGrid : MonoBehaviour
 
     public void UpdateSilhouetteCell(int x, int y)
     {
-        silhouetteGrid[x][y].UpdateShape();
+        if(parent.autoDisplaySilhouetteCells)
+            silhouetteGrid[x][y].UpdateShape();
     }
 
     public void UpdateAllSilhouetteCells()
