@@ -401,7 +401,7 @@ public class VoxelGrid : MonoBehaviour
 
     public Mesh GenerateCombinedMesh(int graphId = -1)
     {
-        //TODO: remove duplicate vertices
+        //TODO: remove duplicate vertices, not very important
         //Can probably be done by removing all faces fully in the voxel face with a connencted voxel through that face
         //https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html
 
@@ -449,13 +449,9 @@ public class VoxelGrid : MonoBehaviour
         }
         Mesh result = new Mesh();
         result.CombineMeshes(combine);
-        //TODO: fix graphics
-        List<Color> colors = new List<Color>();
-        for (i = 0; i < result.vertices.Length; i++)
-        {
-            colors.Add(new Color(1, 1, 1));
-        }
-        result.SetColors(colors);
+        result.Optimize();
+        result.RecalculateNormals();
+        result.RecalculateTangents();
         return result;
     }
 
