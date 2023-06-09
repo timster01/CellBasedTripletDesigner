@@ -183,6 +183,45 @@ public class Voxel : MonoBehaviour
         return result;
     }
 
+    public List<Voxel> EdgeConnectedVoxels()
+    {
+        List<Voxel> result = new List<Voxel>();
+        Voxel currentVoxel;
+        Mesh thisMesh = childShape.GetComponent<MeshFilter>().mesh;
+        Mesh currentMesh;
+        //Each voxel at most one away in 2 directions except itself
+        for (int xoffset = -1; xoffset <= 1; xoffset++)
+            for (int yoffset = -1; yoffset <= 1; yoffset++)
+                for (int zoffset = -1; zoffset <= 1; zoffset++)
+                    if((xoffset == 0 || yoffset == 0 || zoffset == 0) && ! (xoffset == 0 && yoffset == 0 && zoffset == 0))
+                    {
+                        currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
+                        currentMesh = currentVoxel.childShape.GetComponent<MeshFilter>().mesh;
+                        //TODO: Loop over all edges in currentmesh using offset and find if it overlaps another edge or a face
+                        //(maybe only exact equivalent edges are possible)
+                    }
+        return result;
+    }
+
+    public List<Voxel> VertexConnectedVoxels()
+    {
+        List<Voxel> result = new List<Voxel>();
+        Voxel currentVoxel;
+        Mesh thisMesh = childShape.GetComponent<MeshFilter>().mesh;
+        Mesh currentMesh;
+        //Each voxel at most one away in all directions except itself
+        for (int xoffset = -1; xoffset <= 1; xoffset++)
+            for (int yoffset = -1; yoffset <= 1; yoffset++)
+                for (int zoffset = -1; zoffset <= 1; zoffset++)
+                    if (!(xoffset == 0 && yoffset == 0 && zoffset == 0))
+                    {
+                        currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
+                        currentMesh = currentVoxel.childShape.GetComponent<MeshFilter>().mesh;
+                        //TODO: loop over all vertices in current mesh with offset and look for them in thismesh
+                    }
+        return result;
+    }
+
     public void UpdateVoxel()
     {
         Cell.FillValue frontCellFillValue = parent.parent.frontCellGrid.GetCellAtCoords(x,y).CurrentFillValue;
