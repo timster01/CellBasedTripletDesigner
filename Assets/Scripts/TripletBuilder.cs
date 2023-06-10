@@ -191,7 +191,7 @@ public class TripletBuilder : MonoBehaviour
 
                                             }
                                             else
-                                            {
+                                            {//TODO: run for single graph or multi graph on volume, edge and vertex connected
                                                 validResults++;
                                                 if (voxelGrid.nrOfGraphs == 1) //IsTripletConnected()
                                                 {

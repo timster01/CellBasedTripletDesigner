@@ -182,7 +182,7 @@ public class VoxelGrid : MonoBehaviour
         return grid[x][y][z];
     }
 
-    public List<List<Voxel>> GetConnectedGraphs()
+    public List<List<Voxel>> GetConnectedGraphs(bool volume = true, bool edge = false, bool vertex = false)
     {
         List<List<Voxel>> graphs = new List<List<Voxel>>();
         bool shouldBreak = false;
@@ -214,7 +214,7 @@ public class VoxelGrid : MonoBehaviour
                             if (notInAGraph)
                             {
                                 graph.Add(voxel);
-                                graph.AddRange(voxel.ConnectedVoxels());
+                                graph.AddRange(voxel.ConnectedVoxels(volume, edge, vertex));
                                 shouldBreak = true;
                                 foundCell = true;
                                 break;
@@ -235,7 +235,7 @@ public class VoxelGrid : MonoBehaviour
             int i = 1;
             while (i < graph.Count)
             {
-                foreach (Voxel voxel in graph[i].ConnectedVoxels())
+                foreach (Voxel voxel in graph[i].ConnectedVoxels(volume, edge, vertex))
                 {
                     if (!graph.Contains(voxel))
                         graph.Add(voxel);

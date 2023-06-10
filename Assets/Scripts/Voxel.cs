@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class Voxel : MonoBehaviour
 {
@@ -153,7 +154,16 @@ public class Voxel : MonoBehaviour
         return adjacentVoxel.IsConnectedBack();
     }
 
-    public List<Voxel> ConnectedVoxels()
+    public List<Voxel> ConnectedVoxels(bool volume = true, bool edge = false, bool vertex = false)
+    {
+        if (vertex)
+            return VertexConnectedVoxels();
+        if (edge)
+            return EdgeConnectedVoxels();
+        return VolumeConnectedVoxels();
+    }
+
+    public List<Voxel> VolumeConnectedVoxels()
     {
         List<Voxel> result = new List<Voxel>();
         if (IsConnectedDown())
@@ -188,17 +198,40 @@ public class Voxel : MonoBehaviour
         List<Voxel> result = new List<Voxel>();
         Voxel currentVoxel;
         Mesh thisMesh = childShape.GetComponent<MeshFilter>().mesh;
+        List<(Vector3, Vector3)> thisEdges = new List<(Vector3, Vector3)>();
+        for (int i = 0; i < thisMesh.triangles.Length; i += 3)
+        {
+            thisEdges.Add((thisMesh.vertices[thisMesh.triangles[0]], thisMesh.vertices[thisMesh.triangles[1]]));
+            thisEdges.Add((thisMesh.vertices[thisMesh.triangles[1]], thisMesh.vertices[thisMesh.triangles[2]]));
+            thisEdges.Add((thisMesh.vertices[thisMesh.triangles[2]], thisMesh.vertices[thisMesh.triangles[0]]));
+        }
         Mesh currentMesh;
+        List<(Vector3, Vector3)> currentEdges;
+        Vector3 offsetVector;
         //Each voxel at most one away in 2 directions except itself
         for (int xoffset = -1; xoffset <= 1; xoffset++)
             for (int yoffset = -1; yoffset <= 1; yoffset++)
                 for (int zoffset = -1; zoffset <= 1; zoffset++)
                     if((xoffset == 0 || yoffset == 0 || zoffset == 0) && ! (xoffset == 0 && yoffset == 0 && zoffset == 0))
                     {
+                        offsetVector = new Vector3(xoffset, yoffset, zoffset);
                         currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
                         currentMesh = currentVoxel.childShape.GetComponent<MeshFilter>().mesh;
-                        //TODO: Loop over all edges in currentmesh using offset and find if it overlaps another edge or a face
-                        //(maybe only exact equivalent edges are possible)
+                        currentEdges = new List<(Vector3, Vector3)>();
+                        for (int i = 0; i < currentMesh.triangles.Length; i+=3)
+                        {
+                            currentEdges.Add((currentMesh.vertices[currentMesh.triangles[0]] + offsetVector, currentMesh.vertices[currentMesh.triangles[1]] + offsetVector));
+                            currentEdges.Add((currentMesh.vertices[currentMesh.triangles[1]] + offsetVector, currentMesh.vertices[currentMesh.triangles[2]] + offsetVector));
+                            currentEdges.Add((currentMesh.vertices[currentMesh.triangles[2]] + offsetVector, currentMesh.vertices[currentMesh.triangles[0]] + offsetVector));
+                        }
+                        foreach((Vector3,Vector3)edge in currentEdges)
+                        {
+                            if(thisEdges.Contains(edge) || thisEdges.Contains((edge.Item2, edge.Item1)))
+                            {
+                                result.Add(currentVoxel);
+                                break;
+                            }
+                        }
                     }
         return result;
     }
@@ -208,16 +241,26 @@ public class Voxel : MonoBehaviour
         List<Voxel> result = new List<Voxel>();
         Voxel currentVoxel;
         Mesh thisMesh = childShape.GetComponent<MeshFilter>().mesh;
+        List<Vector3> thisVertices = new List<Vector3>(thisMesh.vertices);
         Mesh currentMesh;
+        Vector3 offsetVector;
         //Each voxel at most one away in all directions except itself
         for (int xoffset = -1; xoffset <= 1; xoffset++)
             for (int yoffset = -1; yoffset <= 1; yoffset++)
                 for (int zoffset = -1; zoffset <= 1; zoffset++)
                     if (!(xoffset == 0 && yoffset == 0 && zoffset == 0))
                     {
+                        offsetVector = new Vector3(xoffset, yoffset, zoffset);
                         currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
                         currentMesh = currentVoxel.childShape.GetComponent<MeshFilter>().mesh;
-                        //TODO: loop over all vertices in current mesh with offset and look for them in thismesh
+                        foreach(Vector3 vertex in currentMesh.vertices)
+                        {
+                            if (thisVertices.Contains(vertex + offsetVector))
+                            {
+                                result.Add(currentVoxel);
+                                break;
+                            }
+                        }
                     }
         return result;
     }
