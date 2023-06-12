@@ -126,7 +126,7 @@ public class VoxelGrid : MonoBehaviour
             parent.frontCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(i, z);
         }
-        MarkGraphId();
+        MarkGraphId(GetConnectedGraphs());
         DisplayCombinedMesh();
     }
 
@@ -142,7 +142,7 @@ public class VoxelGrid : MonoBehaviour
             parent.sideCellGrid.UpdateSilhouetteCell(i, z);
             parent.frontCellGrid.UpdateSilhouetteCell(x, i);
         }
-        MarkGraphId();
+        MarkGraphId(GetConnectedGraphs());
         DisplayCombinedMesh();
     }
 
@@ -158,7 +158,7 @@ public class VoxelGrid : MonoBehaviour
             parent.sideCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(x, i);
         }
-        MarkGraphId();
+        MarkGraphId(GetConnectedGraphs());
         DisplayCombinedMesh();
     }
 
@@ -173,7 +173,7 @@ public class VoxelGrid : MonoBehaviour
         parent.frontCellGrid.UpdateAllSilhouetteCells();
         parent.sideCellGrid.UpdateAllSilhouetteCells();
         parent.topCellGrid.UpdateAllSilhouetteCells();
-        MarkGraphId();
+        MarkGraphId(GetConnectedGraphs());
         DisplayCombinedMesh();
     }
 
@@ -247,10 +247,10 @@ public class VoxelGrid : MonoBehaviour
         return graphs;
     }
 
-    public void MarkGraphId()
+    public void MarkGraphId(List<List<Voxel>> graphs)
     {
         int i = 0;
-        foreach (List<Voxel> graph in GetConnectedGraphs())
+        foreach (List<Voxel> graph in graphs)
         {
             foreach (Voxel voxel in graph)
             {

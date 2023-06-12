@@ -19,14 +19,13 @@ public class TripletBuilder : MonoBehaviour
 
     string datasetPath = "";
     string saveResultPath = "";
-    int results = 0;
-    int validResults = 0;
-    int connectedResults = 0;
-    int validConnectedResults = 0;
     int shapeSets = 0;
-    int validAndConnectedShapeSets = 0;
-    int validConnectedSubGraphs = 0;
-    int validConnectedShapeSetSubGraphs = 0;
+    int volumeConnectedValidGraphs = 0;
+    int volumeConnectedValidSubgraphs = 0;
+    int edgeConnectedValidGraphs = 0;
+    int edgeConnectedValidSubgraphs = 0;
+    int vertexConnectedValidGraphs = 0;
+    int vertexConnectedValidSubgraphs = 0;
 
     //TODO: make toggleable using a button, maybe
     public bool autoDisplaySilhouetteCells = true;
@@ -117,14 +116,13 @@ public class TripletBuilder : MonoBehaviour
 
     public void ResetResultValues()
     {
-        results = 0;
-        validResults = 0;
-        connectedResults = 0;
-        validConnectedResults = 0;
         shapeSets = 0;
-        validAndConnectedShapeSets = 0;
-        validConnectedSubGraphs = 0;
-        validConnectedShapeSetSubGraphs = 0;
+        volumeConnectedValidGraphs = 0;
+        volumeConnectedValidSubgraphs = 0;
+        edgeConnectedValidGraphs = 0;
+        edgeConnectedValidSubgraphs = 0;
+        vertexConnectedValidGraphs = 0;
+        vertexConnectedValidSubgraphs = 0;
     }
 
     public void RunTestSet(string dataPath, string savePath)
@@ -134,7 +132,7 @@ public class TripletBuilder : MonoBehaviour
         autoDisplayCombinedMesh = false;
         bool currentAutoDisplaySilhouetteCellsValue = autoDisplaySilhouetteCells;
         autoDisplaySilhouetteCells = false;
-
+        List<List<Voxel>> graphs;
         List<List<Cell.FillValue>> frontBackup = frontCellGrid.GridFillValues();
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
@@ -142,8 +140,13 @@ public class TripletBuilder : MonoBehaviour
         int rdegsFront, rdegsSide, rdegsTop;
         bool xmirFront, xmirSide, xmirTop;
         bool ymirFront, ymirSide, ymirTop;
-        bool validGraphSilhouetteFound;
         string filename;
+        bool volumeConnectedValidGraphFound = false;
+        bool volumeConnectedValidSubgraphFound = false;
+        bool edgeConnectedValidGraphFound = false;
+        bool edgeConnectedValidSubgraphFound = false;
+        bool vertexConnectedValidGraphFound = false;
+        bool vertexConnectedValidSubgraphFound = false;
         foreach (FileSystemEntry fileFront in files)
         {
             if (fileFront.Extension != ".shape")
@@ -162,8 +165,27 @@ public class TripletBuilder : MonoBehaviour
                     rdegsFront = 0;
                     xmirFront = xmirSide = xmirTop = false;
                     ymirFront = ymirSide = ymirTop = false;
-                    bool newShapeSet = true;
-                    bool newShapeSetSubgraph = true;
+                    volumeConnectedValidGraphFound = false;
+
+                    if (volumeConnectedValidGraphFound)
+                        volumeConnectedValidGraphs++;
+                    else if (volumeConnectedValidSubgraphFound)
+                        volumeConnectedValidSubgraphs++;
+                    else if (edgeConnectedValidGraphFound)
+                        edgeConnectedValidGraphs++;
+                    else if (edgeConnectedValidSubgraphFound)
+                        edgeConnectedValidSubgraphs++;
+                    else if (vertexConnectedValidGraphFound)
+                        vertexConnectedValidGraphs++;
+                    else if (vertexConnectedValidSubgraphFound)
+                        vertexConnectedValidSubgraphs++;
+
+                    volumeConnectedValidGraphFound = false;
+                    volumeConnectedValidSubgraphFound = false;
+                    edgeConnectedValidGraphFound = false;
+                    edgeConnectedValidSubgraphFound = false;
+                    vertexConnectedValidGraphFound = false;
+                    vertexConnectedValidSubgraphFound = false;
                     shapeSets++;
                     for (int rotFront = 0; rotFront < 4; rotFront++)
                     {
@@ -183,56 +205,117 @@ public class TripletBuilder : MonoBehaviour
                                                 $"{fileSide.Name[0]}_r{rdegsSide}{(xmirSide ? "_xmir" : "")}{(ymirSide ? "_ymir" : "")}"+
                                                 $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
 
-                                            results++;
-                                            
-                                            if (!IsSilhouetteValid())
-                                            {
-                                                connectedResults += IsTripletConnected() ? 1 : 0;
 
-                                            }
-                                            else
-                                            {//TODO: run for single graph or multi graph on volume, edge and vertex connected
-                                                validResults++;
-                                                if (voxelGrid.nrOfGraphs == 1) //IsTripletConnected()
+                                            //TODO: maybe save valid and semi valid results, would ignore early breaks if other results have been found already, filename should contain vality level
+
+                                            //Handle this situation for the current shapeset
+                                            while (true)
+                                            {
+                                                //Volume connected
+
+                                                if (volumeConnectedValidGraphFound)
+                                                    break;
+                                                graphs = voxelGrid.GetConnectedGraphs();
+                                                voxelGrid.MarkGraphId(graphs);
+                                                if (graphs.Count == 1)
                                                 {
-                                                    connectedResults++;
-                                                    validConnectedResults++;
-                                                    if(newShapeSet)
+                                                    if (IsSilhouetteValid())
                                                     {
-                                                        newShapeSet = false;
-                                                        validAndConnectedShapeSets++;
-                                                        if (newShapeSetSubgraph)
-                                                        {
-                                                            newShapeSetSubgraph = false;
-                                                            validConnectedShapeSetSubGraphs++;
-                                                        }
+                                                        volumeConnectedValidGraphFound = true;
+                                                        break;
                                                     }
-                                                    voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}.obj" });
                                                 }
-                                                else
+                                                if (volumeConnectedValidSubgraphFound)
+                                                    break;
+                                                if (graphs.Count > 1)
                                                 {
-                                                    validGraphSilhouetteFound = false;
-                                                    for (int i = 0; i < voxelGrid.nrOfGraphs; i++)
+                                                    for (int i = 0; i < graphs.Count; i++)
                                                     {
                                                         if (IsSilhouetteValid(i))
                                                         {
-                                                            validGraphSilhouetteFound = true;
-                                                            voxelGrid.SaveToFile(new string[] { $"{savePath}/{filename}subgraph{i}.obj" }, i);
+                                                            volumeConnectedValidSubgraphFound = true;
+                                                            break;
                                                         }
                                                     }
-                                                    
-                                                    if (validGraphSilhouetteFound)
+                                                    if(volumeConnectedValidSubgraphFound)
+                                                        break;
+                                                }
+
+                                                //Edge connected
+                                                if (edgeConnectedValidGraphFound)
+                                                    break;
+                                                graphs = voxelGrid.GetConnectedGraphs(false, true, false);
+                                                voxelGrid.MarkGraphId(graphs);
+                                                if (graphs.Count == 1)
+                                                {
+                                                    if (IsSilhouetteValid())
                                                     {
-                                                        validConnectedSubGraphs++;
-                                                        if (newShapeSetSubgraph && newShapeSet)
-                                                        {
-                                                            newShapeSetSubgraph = false;
-                                                            validConnectedShapeSetSubGraphs++;
-                                                        }
+                                                        edgeConnectedValidGraphFound = true;
+                                                        break;
                                                     }
                                                 }
+                                                if (edgeConnectedValidSubgraphFound)
+                                                    break;
+                                                if (graphs.Count > 1)
+                                                {
+                                                    for (int i = 0; i < graphs.Count; i++)
+                                                    {
+                                                        if (IsSilhouetteValid(i))
+                                                        {
+                                                            edgeConnectedValidSubgraphFound = true;
+                                                            break;
+                                                        }
+                                                        if (edgeConnectedValidSubgraphFound)
+                                                            break;
+                                                    }
+                                                }
+
+                                                //Vertex connected
+                                                if (vertexConnectedValidGraphFound)
+                                                    break;
+                                                graphs = voxelGrid.GetConnectedGraphs(false, false, true);
+                                                voxelGrid.MarkGraphId(graphs);
+                                                if (graphs.Count == 1)
+                                                {
+                                                    if (IsSilhouetteValid())
+                                                    {
+                                                        vertexConnectedValidGraphFound = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (vertexConnectedValidSubgraphFound)
+                                                    break;
+                                                if (graphs.Count > 1)
+                                                {
+                                                    for (int i = 0; i < graphs.Count; i++)
+                                                    {
+                                                        if (IsSilhouetteValid(i))
+                                                        {
+                                                            vertexConnectedValidSubgraphFound = true;
+                                                            break;
+                                                        }
+                                                        if (vertexConnectedValidSubgraphFound)
+                                                            break;
+                                                    }
+                                                }
+                                                break;
                                             }
+                                            //Finished this situation for the current shapesets
+
+                                            if (volumeConnectedValidGraphFound)
+                                                volumeConnectedValidSubgraphFound = true;
+
+                                            if (volumeConnectedValidSubgraphFound)
+                                                edgeConnectedValidGraphFound = true;
+
+                                            if (edgeConnectedValidGraphFound)
+                                                edgeConnectedValidSubgraphFound = true;
+
+                                            if (edgeConnectedValidSubgraphFound)
+                                                vertexConnectedValidGraphFound = true;
                                             
+                                            if (vertexConnectedValidGraphFound)
+                                                vertexConnectedValidSubgraphFound = true;
 
 
                                             if (!xmirTop && !ymirTop)
@@ -307,8 +390,7 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid.LoadFillValueList(frontBackup);
         sideCellGrid.LoadFillValueList(sideBackup);
         topCellGrid.LoadFillValueList(topBackup);
-        Debug.Log($"{results}:{validResults}:{connectedResults}:{validConnectedResults}");
-        Debug.Log($"{shapeSets}:{validAndConnectedShapeSets}");
+        Debug.Log($"{shapeSets}:{volumeConnectedValidGraphs}:{volumeConnectedValidSubgraphs}:{edgeConnectedValidGraphs}:{edgeConnectedValidSubgraphs}:{vertexConnectedValidGraphs}:{vertexConnectedValidSubgraphs}");
     }
 
 
