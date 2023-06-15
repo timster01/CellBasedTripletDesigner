@@ -26,6 +26,7 @@ public class TripletBuilder : MonoBehaviour
     int edgeConnectedValidSubgraphs = 0;
     int vertexConnectedValidGraphs = 0;
     int vertexConnectedValidSubgraphs = 0;
+    int unconnectedValidGraphs = 0;
 
     //TODO: make toggleable using a button, maybe
     public bool autoDisplaySilhouetteCells = true;
@@ -147,6 +148,10 @@ public class TripletBuilder : MonoBehaviour
         bool edgeConnectedValidSubgraphFound = false;
         bool vertexConnectedValidGraphFound = false;
         bool vertexConnectedValidSubgraphFound = false;
+        bool unconnectedValidGraphFound = false;
+
+        List<string> shapesInSet = new List<string>();
+
         foreach (FileSystemEntry fileFront in files)
         {
             if (fileFront.Extension != ".shape")
@@ -157,36 +162,25 @@ public class TripletBuilder : MonoBehaviour
                     continue;
                 foreach (FileSystemEntry fileTop in files)
                 {
+
                     if (fileTop.Extension != ".shape")
                         continue;
                     frontCellGrid.LoadFromFile(new string[] { fileFront.Path });
                     sideCellGrid.LoadFromFile(new string[] { fileSide.Path });
                     topCellGrid.LoadFromFile(new string[] { fileTop.Path });
+                    shapesInSet = new List<string>();
+                    shapesInSet.Add(fileFront.Name);
+                    if(fileFront.Name != fileSide.Name)
+                        shapesInSet.Add(fileSide.Name);
+                    if (fileFront.Name != fileTop.Name && fileSide.Name != fileTop.Name)
+                        shapesInSet.Add(fileSide.Name);
+
                     rdegsFront = 0;
                     xmirFront = xmirSide = xmirTop = false;
                     ymirFront = ymirSide = ymirTop = false;
-                    volumeConnectedValidGraphFound = false;
-
-                    if (volumeConnectedValidGraphFound)
-                        volumeConnectedValidGraphs++;
-                    else if (volumeConnectedValidSubgraphFound)
-                        volumeConnectedValidSubgraphs++;
-                    else if (edgeConnectedValidGraphFound)
-                        edgeConnectedValidGraphs++;
-                    else if (edgeConnectedValidSubgraphFound)
-                        edgeConnectedValidSubgraphs++;
-                    else if (vertexConnectedValidGraphFound)
-                        vertexConnectedValidGraphs++;
-                    else if (vertexConnectedValidSubgraphFound)
-                        vertexConnectedValidSubgraphs++;
-
-                    volumeConnectedValidGraphFound = false;
-                    volumeConnectedValidSubgraphFound = false;
-                    edgeConnectedValidGraphFound = false;
-                    edgeConnectedValidSubgraphFound = false;
-                    vertexConnectedValidGraphFound = false;
-                    vertexConnectedValidSubgraphFound = false;
+               
                     shapeSets++;
+
                     for (int rotFront = 0; rotFront < 4; rotFront++)
                     {
                         rdegsSide = 0;
@@ -298,6 +292,14 @@ public class TripletBuilder : MonoBehaviour
                                                             break;
                                                     }
                                                 }
+                                                
+                                                //Unconnected but valid
+                                                if (unconnectedValidGraphFound)
+                                                    break;
+
+                                                unconnectedValidGraphFound = IsSilhouetteValid();
+
+                                                //Not valid at all
                                                 break;
                                             }
                                             //Finished this situation for the current shapesets
@@ -316,6 +318,9 @@ public class TripletBuilder : MonoBehaviour
                                             
                                             if (vertexConnectedValidGraphFound)
                                                 vertexConnectedValidSubgraphFound = true;
+
+                                            if (vertexConnectedValidSubgraphFound)
+                                                unconnectedValidGraphFound = true;
 
 
                                             if (!xmirTop && !ymirTop)
@@ -381,6 +386,37 @@ public class TripletBuilder : MonoBehaviour
                         frontCellGrid.RotateClockWise();
                         rdegsFront += 90;
                     }
+
+                    //Handle the best case connectedness and validity for this shapeset
+                    if (volumeConnectedValidGraphFound)
+                        volumeConnectedValidGraphs++;
+                    else if (volumeConnectedValidSubgraphFound)
+                        volumeConnectedValidSubgraphs++;
+                    else if (edgeConnectedValidGraphFound)
+                        edgeConnectedValidGraphs++;
+                    else if (edgeConnectedValidSubgraphFound)
+                        edgeConnectedValidSubgraphs++;
+                    else if (vertexConnectedValidGraphFound)
+                        vertexConnectedValidGraphs++;
+                    else if (vertexConnectedValidSubgraphFound)
+                        vertexConnectedValidSubgraphs++;
+                    else if (unconnectedValidGraphFound)
+                        unconnectedValidGraphs++;
+
+                    volumeConnectedValidGraphFound = false;
+                    volumeConnectedValidSubgraphFound = false;
+                    edgeConnectedValidGraphFound = false;
+                    edgeConnectedValidSubgraphFound = false;
+                    vertexConnectedValidGraphFound = false;
+                    vertexConnectedValidSubgraphFound = false;
+                    unconnectedValidGraphFound = false;
+
+                    //TODO: Up the same values for connectedness and validity levels for each shape in a dict
+                    foreach(string shapeName in shapesInSet)
+                    {
+
+                    }
+
                 }
             }
         }
