@@ -151,273 +151,267 @@ public class TripletBuilder : MonoBehaviour
         bool unconnectedValidGraphFound = false;
 
         List<string> shapesInSet = new List<string>();
-
-        foreach (FileSystemEntry fileFront in files)
-        {
-            if (fileFront.Extension != ".shape")
+        FileSystemEntry fileFront;
+        FileSystemEntry fileSide;
+        FileSystemEntry fileTop;
+        List<List<FileSystemEntry>> fileCombinationsWithRepetition = GenerateCombinations(new List<FileSystemEntry>(files), 3);
+        foreach (List<FileSystemEntry> combination in fileCombinationsWithRepetition)
+        { 
+            fileFront = combination[0];
+            fileSide = combination[1];
+            fileTop = combination[2];
+            if (fileFront.Extension != ".shape" || fileSide.Extension != ".shape" || fileTop.Extension != ".shape")
                 continue;
-            foreach (FileSystemEntry fileSide in files)
-            {
-                if (fileSide.Extension != ".shape")
-                    continue;
-                foreach (FileSystemEntry fileTop in files)
-                {
+            frontCellGrid.LoadFromFile(new string[] { fileFront.Path });
+            sideCellGrid.LoadFromFile(new string[] { fileSide.Path });
+            topCellGrid.LoadFromFile(new string[] { fileTop.Path });
+            shapesInSet = new List<string>();
+            shapesInSet.Add(fileFront.Name);
+            if(fileFront.Name != fileSide.Name)
+                shapesInSet.Add(fileSide.Name);
+            if (fileFront.Name != fileTop.Name && fileSide.Name != fileTop.Name)
+                shapesInSet.Add(fileSide.Name);
 
-                    if (fileTop.Extension != ".shape")
-                        continue;
-                    frontCellGrid.LoadFromFile(new string[] { fileFront.Path });
-                    sideCellGrid.LoadFromFile(new string[] { fileSide.Path });
-                    topCellGrid.LoadFromFile(new string[] { fileTop.Path });
-                    shapesInSet = new List<string>();
-                    shapesInSet.Add(fileFront.Name);
-                    if(fileFront.Name != fileSide.Name)
-                        shapesInSet.Add(fileSide.Name);
-                    if (fileFront.Name != fileTop.Name && fileSide.Name != fileTop.Name)
-                        shapesInSet.Add(fileSide.Name);
-
-                    rdegsFront = 0;
-                    xmirFront = xmirSide = xmirTop = false;
-                    ymirFront = ymirSide = ymirTop = false;
+            rdegsFront = 0;
+            xmirFront = xmirSide = xmirTop = false;
+            ymirFront = ymirSide = ymirTop = false;
                
-                    shapeSets++;
+            shapeSets++;
 
-                    for (int rotFront = 0; rotFront < 4; rotFront++)
+            for (int rotFront = 0; rotFront < 4; rotFront++)
+            {
+                rdegsSide = 0;
+                for (int rotSide = 0; rotSide < 4; rotSide++)
+                {
+                    rdegsTop = 0;
+                    for (int rotTop = 0; rotTop < 4; rotTop++)
                     {
-                        rdegsSide = 0;
-                        for (int rotSide = 0; rotSide < 4; rotSide++)
+                        for (int mirFront = 0; mirFront < 3; mirFront++)
                         {
-                            rdegsTop = 0;
-                            for (int rotTop = 0; rotTop < 4; rotTop++)
+                            for (int mirSide = 0; mirSide < 3; mirSide++)
                             {
-                                for (int mirFront = 0; mirFront < 3; mirFront++)
+                                for (int mirTop = 0; mirTop < 3; mirTop++)
                                 {
-                                    for (int mirSide = 0; mirSide < 3; mirSide++)
+                                    filename = $"{fileFront.Name[0]}_r{rdegsFront}{(xmirFront ? "_xmir" : "")}{(ymirFront ? "_ymir" : "")}" +
+                                        $"{fileSide.Name[0]}_r{rdegsSide}{(xmirSide ? "_xmir" : "")}{(ymirSide ? "_ymir" : "")}"+
+                                        $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
+
+
+                                    //TODO: maybe save valid and semi valid results, would ignore early breaks if other results have been found already, filename should contain vality level
+
+                                    //Handle this situation for the current shapeset
+                                    while (true)
                                     {
-                                        for (int mirTop = 0; mirTop < 3; mirTop++)
+                                        //Volume connected
+
+                                        if (volumeConnectedValidGraphFound)
+                                            break;
+                                        graphs = voxelGrid.GetConnectedGraphs();
+                                        voxelGrid.MarkGraphId(graphs);
+                                        if (graphs.Count == 1)
                                         {
-                                            filename = $"{fileFront.Name[0]}_r{rdegsFront}{(xmirFront ? "_xmir" : "")}{(ymirFront ? "_ymir" : "")}" +
-                                                $"{fileSide.Name[0]}_r{rdegsSide}{(xmirSide ? "_xmir" : "")}{(ymirSide ? "_ymir" : "")}"+
-                                                $"{fileTop.Name[0]}_r{rdegsTop}{(xmirTop ? "_xmir" : "")}{(ymirTop ? "_ymir" : "")}";
-
-
-                                            //TODO: maybe save valid and semi valid results, would ignore early breaks if other results have been found already, filename should contain vality level
-
-                                            //Handle this situation for the current shapeset
-                                            while (true)
+                                            if (IsSilhouetteValid())
                                             {
-                                                //Volume connected
-
-                                                if (volumeConnectedValidGraphFound)
-                                                    break;
-                                                graphs = voxelGrid.GetConnectedGraphs();
-                                                voxelGrid.MarkGraphId(graphs);
-                                                if (graphs.Count == 1)
+                                                volumeConnectedValidGraphFound = true;
+                                                break;
+                                            }
+                                        }
+                                        if (volumeConnectedValidSubgraphFound)
+                                            break;
+                                        if (graphs.Count > 1)
+                                        {
+                                            for (int i = 0; i < graphs.Count; i++)
+                                            {
+                                                if (IsSilhouetteValid(i))
                                                 {
-                                                    if (IsSilhouetteValid())
-                                                    {
-                                                        volumeConnectedValidGraphFound = true;
-                                                        break;
-                                                    }
+                                                    volumeConnectedValidSubgraphFound = true;
+                                                    break;
                                                 }
-                                                if (volumeConnectedValidSubgraphFound)
-                                                    break;
-                                                if (graphs.Count > 1)
-                                                {
-                                                    for (int i = 0; i < graphs.Count; i++)
-                                                    {
-                                                        if (IsSilhouetteValid(i))
-                                                        {
-                                                            volumeConnectedValidSubgraphFound = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if(volumeConnectedValidSubgraphFound)
-                                                        break;
-                                                }
+                                            }
+                                            if(volumeConnectedValidSubgraphFound)
+                                                break;
+                                        }
 
-                                                //Edge connected
-                                                if (edgeConnectedValidGraphFound)
-                                                    break;
-                                                graphs = voxelGrid.GetConnectedGraphs(false, true, false);
-                                                voxelGrid.MarkGraphId(graphs);
-                                                if (graphs.Count == 1)
+                                        //Edge connected
+                                        if (edgeConnectedValidGraphFound)
+                                            break;
+                                        graphs = voxelGrid.GetConnectedGraphs(false, true, false);
+                                        voxelGrid.MarkGraphId(graphs);
+                                        if (graphs.Count == 1)
+                                        {
+                                            if (IsSilhouetteValid())
+                                            {
+                                                edgeConnectedValidGraphFound = true;
+                                                break;
+                                            }
+                                        }
+                                        if (edgeConnectedValidSubgraphFound)
+                                            break;
+                                        if (graphs.Count > 1)
+                                        {
+                                            for (int i = 0; i < graphs.Count; i++)
+                                            {
+                                                if (IsSilhouetteValid(i))
                                                 {
-                                                    if (IsSilhouetteValid())
-                                                    {
-                                                        edgeConnectedValidGraphFound = true;
-                                                        break;
-                                                    }
+                                                    edgeConnectedValidSubgraphFound = true;
+                                                    break;
                                                 }
                                                 if (edgeConnectedValidSubgraphFound)
                                                     break;
-                                                if (graphs.Count > 1)
-                                                {
-                                                    for (int i = 0; i < graphs.Count; i++)
-                                                    {
-                                                        if (IsSilhouetteValid(i))
-                                                        {
-                                                            edgeConnectedValidSubgraphFound = true;
-                                                            break;
-                                                        }
-                                                        if (edgeConnectedValidSubgraphFound)
-                                                            break;
-                                                    }
-                                                }
+                                            }
+                                        }
 
-                                                //Vertex connected
-                                                if (vertexConnectedValidGraphFound)
-                                                    break;
-                                                graphs = voxelGrid.GetConnectedGraphs(false, false, true);
-                                                voxelGrid.MarkGraphId(graphs);
-                                                if (graphs.Count == 1)
+                                        //Vertex connected
+                                        if (vertexConnectedValidGraphFound)
+                                            break;
+                                        graphs = voxelGrid.GetConnectedGraphs(false, false, true);
+                                        voxelGrid.MarkGraphId(graphs);
+                                        if (graphs.Count == 1)
+                                        {
+                                            if (IsSilhouetteValid())
+                                            {
+                                                vertexConnectedValidGraphFound = true;
+                                                break;
+                                            }
+                                        }
+                                        if (vertexConnectedValidSubgraphFound)
+                                            break;
+                                        if (graphs.Count > 1)
+                                        {
+                                            for (int i = 0; i < graphs.Count; i++)
+                                            {
+                                                if (IsSilhouetteValid(i))
                                                 {
-                                                    if (IsSilhouetteValid())
-                                                    {
-                                                        vertexConnectedValidGraphFound = true;
-                                                        break;
-                                                    }
+                                                    vertexConnectedValidSubgraphFound = true;
+                                                    break;
                                                 }
                                                 if (vertexConnectedValidSubgraphFound)
                                                     break;
-                                                if (graphs.Count > 1)
-                                                {
-                                                    for (int i = 0; i < graphs.Count; i++)
-                                                    {
-                                                        if (IsSilhouetteValid(i))
-                                                        {
-                                                            vertexConnectedValidSubgraphFound = true;
-                                                            break;
-                                                        }
-                                                        if (vertexConnectedValidSubgraphFound)
-                                                            break;
-                                                    }
-                                                }
+                                            }
+                                        }
                                                 
-                                                //Unconnected but valid
-                                                if (unconnectedValidGraphFound)
-                                                    break;
+                                        //Unconnected but valid
+                                        if (unconnectedValidGraphFound)
+                                            break;
 
-                                                unconnectedValidGraphFound = IsSilhouetteValid();
+                                        unconnectedValidGraphFound = IsSilhouetteValid();
 
-                                                //Not valid at all
-                                                break;
-                                            }
-                                            //Finished this situation for the current shapesets
+                                        //Not valid at all
+                                        break;
+                                    }
+                                    //Finished this situation for the current shapesets
 
-                                            if (volumeConnectedValidGraphFound)
-                                                volumeConnectedValidSubgraphFound = true;
+                                    if (volumeConnectedValidGraphFound)
+                                        volumeConnectedValidSubgraphFound = true;
 
-                                            if (volumeConnectedValidSubgraphFound)
-                                                edgeConnectedValidGraphFound = true;
+                                    if (volumeConnectedValidSubgraphFound)
+                                        edgeConnectedValidGraphFound = true;
 
-                                            if (edgeConnectedValidGraphFound)
-                                                edgeConnectedValidSubgraphFound = true;
+                                    if (edgeConnectedValidGraphFound)
+                                        edgeConnectedValidSubgraphFound = true;
 
-                                            if (edgeConnectedValidSubgraphFound)
-                                                vertexConnectedValidGraphFound = true;
+                                    if (edgeConnectedValidSubgraphFound)
+                                        vertexConnectedValidGraphFound = true;
                                             
-                                            if (vertexConnectedValidGraphFound)
-                                                vertexConnectedValidSubgraphFound = true;
+                                    if (vertexConnectedValidGraphFound)
+                                        vertexConnectedValidSubgraphFound = true;
 
-                                            if (vertexConnectedValidSubgraphFound)
-                                                unconnectedValidGraphFound = true;
+                                    if (vertexConnectedValidSubgraphFound)
+                                        unconnectedValidGraphFound = true;
 
 
-                                            if (!xmirTop && !ymirTop)
-                                            {
-                                                topCellGrid.MirrorLeftRight();
-                                                xmirTop = true;
-                                            }
-                                            if (xmirTop)
-                                            {
-                                                topCellGrid.MirrorLeftRight();
-                                                xmirTop = false;
-                                                topCellGrid.MirrorTopBottom();
-                                                ymirTop = true;
-                                            }
-                                            if (ymirTop)
-                                            {
-                                                topCellGrid.MirrorTopBottom();
-                                                ymirTop = false;
-                                            }
-                                        }
-                                        if (!xmirSide && !ymirSide)
-                                        {
-                                            sideCellGrid.MirrorLeftRight();
-                                            xmirSide = true;
-                                        }
-                                        if (xmirSide)
-                                        {
-                                            sideCellGrid.MirrorLeftRight();
-                                            xmirSide = false;
-                                            sideCellGrid.MirrorTopBottom();
-                                            ymirSide = true;
-                                        }
-                                        if (ymirSide)
-                                        {
-                                            sideCellGrid.MirrorTopBottom();
-                                            ymirSide = false;
-                                        }
-                                    }
-                                    if (!xmirFront && !ymirFront)
+                                    if (!xmirTop && !ymirTop)
                                     {
-                                        frontCellGrid.MirrorLeftRight();
-                                        xmirFront = true;
+                                        topCellGrid.MirrorLeftRight();
+                                        xmirTop = true;
                                     }
-                                    if (xmirFront)
+                                    if (xmirTop)
                                     {
-                                        frontCellGrid.MirrorLeftRight();
-                                        xmirFront = false;
-                                        frontCellGrid.MirrorTopBottom();
-                                        ymirFront = true;
+                                        topCellGrid.MirrorLeftRight();
+                                        xmirTop = false;
+                                        topCellGrid.MirrorTopBottom();
+                                        ymirTop = true;
                                     }
-                                    if (ymirFront)
+                                    if (ymirTop)
                                     {
-                                        frontCellGrid.MirrorTopBottom();
-                                        ymirFront = false;
+                                        topCellGrid.MirrorTopBottom();
+                                        ymirTop = false;
                                     }
                                 }
-                                topCellGrid.RotateClockWise();
-                                rdegsTop += 90;
+                                if (!xmirSide && !ymirSide)
+                                {
+                                    sideCellGrid.MirrorLeftRight();
+                                    xmirSide = true;
+                                }
+                                if (xmirSide)
+                                {
+                                    sideCellGrid.MirrorLeftRight();
+                                    xmirSide = false;
+                                    sideCellGrid.MirrorTopBottom();
+                                    ymirSide = true;
+                                }
+                                if (ymirSide)
+                                {
+                                    sideCellGrid.MirrorTopBottom();
+                                    ymirSide = false;
+                                }
                             }
-                            sideCellGrid.RotateClockWise();
-                            rdegsSide += 90;
+                            if (!xmirFront && !ymirFront)
+                            {
+                                frontCellGrid.MirrorLeftRight();
+                                xmirFront = true;
+                            }
+                            if (xmirFront)
+                            {
+                                frontCellGrid.MirrorLeftRight();
+                                xmirFront = false;
+                                frontCellGrid.MirrorTopBottom();
+                                ymirFront = true;
+                            }
+                            if (ymirFront)
+                            {
+                                frontCellGrid.MirrorTopBottom();
+                                ymirFront = false;
+                            }
                         }
-                        frontCellGrid.RotateClockWise();
-                        rdegsFront += 90;
+                        topCellGrid.RotateClockWise();
+                        rdegsTop += 90;
                     }
-
-                    //Handle the best case connectedness and validity for this shapeset
-                    if (volumeConnectedValidGraphFound)
-                        volumeConnectedValidGraphs++;
-                    else if (volumeConnectedValidSubgraphFound)
-                        volumeConnectedValidSubgraphs++;
-                    else if (edgeConnectedValidGraphFound)
-                        edgeConnectedValidGraphs++;
-                    else if (edgeConnectedValidSubgraphFound)
-                        edgeConnectedValidSubgraphs++;
-                    else if (vertexConnectedValidGraphFound)
-                        vertexConnectedValidGraphs++;
-                    else if (vertexConnectedValidSubgraphFound)
-                        vertexConnectedValidSubgraphs++;
-                    else if (unconnectedValidGraphFound)
-                        unconnectedValidGraphs++;
-
-                    volumeConnectedValidGraphFound = false;
-                    volumeConnectedValidSubgraphFound = false;
-                    edgeConnectedValidGraphFound = false;
-                    edgeConnectedValidSubgraphFound = false;
-                    vertexConnectedValidGraphFound = false;
-                    vertexConnectedValidSubgraphFound = false;
-                    unconnectedValidGraphFound = false;
-
-                    //TODO: Up the same values for connectedness and validity levels for each shape in a dict
-                    foreach(string shapeName in shapesInSet)
-                    {
-
-                    }
-
+                    sideCellGrid.RotateClockWise();
+                    rdegsSide += 90;
                 }
+                frontCellGrid.RotateClockWise();
+                rdegsFront += 90;
+            }
+
+            //Handle the best case connectedness and validity for this shapeset
+            if (volumeConnectedValidGraphFound)
+                volumeConnectedValidGraphs++;
+            else if (volumeConnectedValidSubgraphFound)
+                volumeConnectedValidSubgraphs++;
+            else if (edgeConnectedValidGraphFound)
+                edgeConnectedValidGraphs++;
+            else if (edgeConnectedValidSubgraphFound)
+                edgeConnectedValidSubgraphs++;
+            else if (vertexConnectedValidGraphFound)
+                vertexConnectedValidGraphs++;
+            else if (vertexConnectedValidSubgraphFound)
+                vertexConnectedValidSubgraphs++;
+            else if (unconnectedValidGraphFound)
+                unconnectedValidGraphs++;
+
+            volumeConnectedValidGraphFound = false;
+            volumeConnectedValidSubgraphFound = false;
+            edgeConnectedValidGraphFound = false;
+            edgeConnectedValidSubgraphFound = false;
+            vertexConnectedValidGraphFound = false;
+            vertexConnectedValidSubgraphFound = false;
+            unconnectedValidGraphFound = false;
+
+            //TODO: Up the same values for connectedness and validity levels for each shape in a dict
+            foreach(string shapeName in shapesInSet)
+            {
+
             }
         }
 
@@ -446,6 +440,40 @@ public class TripletBuilder : MonoBehaviour
                 saveResultPath = FileBrowser.Result[0];
         }
         controller.EnableCamControl();
+    }
+
+    private static List<List<T>> GenerateCombinations<T>(List<T> combinationList, int k)
+    {
+        var combinations = new List<List<T>>();
+
+        if (k == 0)
+        {
+            var emptyCombination = new List<T>();
+            combinations.Add(emptyCombination);
+
+            return combinations;
+        }
+
+        if (combinationList.Count == 0)
+        {
+            return combinations;
+        }
+
+        T head = combinationList[0];
+        var copiedCombinationList = new List<T>(combinationList);
+
+        List<List<T>> subcombinations = GenerateCombinations(copiedCombinationList, k - 1);
+
+        foreach (var subcombination in subcombinations)
+        {
+            subcombination.Insert(0, head);
+            combinations.Add(subcombination);
+        }
+
+        combinationList.RemoveAt(0);
+        combinations.AddRange(GenerateCombinations(combinationList, k));
+
+        return combinations;
     }
 
 }
