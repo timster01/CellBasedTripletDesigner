@@ -486,9 +486,6 @@ public class VoxelGrid : MonoBehaviour
             remove = remove || (back && input.vertices[input.triangles[i]].z == 0.5f &&
                 input.vertices[input.triangles[i + 1]].z == 0.5f &&
                 input.vertices[input.triangles[i + 2]].z == 0.5f);
-            Debug.Log("hello");
-            if (remove)
-                Debug.Log("removed something");
             if (!remove)
             {
                 newTriangles.Add(input.triangles[i]);
