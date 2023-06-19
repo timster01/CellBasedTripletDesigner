@@ -468,15 +468,14 @@ public class TripletBuilder : MonoBehaviour
                     unconnectedValidGraphsPerShape[shapeName]++;
                 else
                     invalidGraphsPerShape[shapeName]++;
-
-                volumeConnectedValidGraphFound = false;
-                volumeConnectedValidSubgraphFound = false;
-                edgeConnectedValidGraphFound = false;
-                edgeConnectedValidSubgraphFound = false;
-                vertexConnectedValidGraphFound = false;
-                vertexConnectedValidSubgraphFound = false;
-                unconnectedValidGraphFound = false;
             }
+            volumeConnectedValidGraphFound = false;
+            volumeConnectedValidSubgraphFound = false;
+            edgeConnectedValidGraphFound = false;
+            edgeConnectedValidSubgraphFound = false;
+            vertexConnectedValidGraphFound = false;
+            vertexConnectedValidSubgraphFound = false;
+            unconnectedValidGraphFound = false;
         }
 
         autoDisplayCombinedMesh = currentAutoDisplayMeshValue;
