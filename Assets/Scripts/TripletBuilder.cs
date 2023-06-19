@@ -214,7 +214,7 @@ public class TripletBuilder : MonoBehaviour
                
             shapeSets++;
 
-            EditorUtility.DisplayProgressBar("Simple Progress Bar", "Doing some work...", shapeSets / fileCombinationsWithRepetition.Count);
+            EditorUtility.DisplayProgressBar("Simple Progress Bar", "Doing some work...", shapeSets / (float)fileCombinationsWithRepetition.Count);
             for (int rotFront = 0; rotFront < 4; rotFront++)
             {
                 rdegsSide = 0;
