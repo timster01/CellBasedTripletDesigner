@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using SimpleFileBrowser;
 
@@ -27,6 +28,17 @@ public class TripletBuilder : MonoBehaviour
     int vertexConnectedValidGraphs = 0;
     int vertexConnectedValidSubgraphs = 0;
     int unconnectedValidGraphs = 0;
+    int invalidGraphs = 0;
+
+    Dictionary<string, int> shapeSetsPerShape;
+    Dictionary<string, int> volumeConnectedValidGraphsPerShape;
+    Dictionary<string, int> volumeConnectedValidSubgraphsPerShape;
+    Dictionary<string, int> edgeConnectedValidGraphsPerShape;
+    Dictionary<string, int> edgeConnectedValidSubgraphsPerShape;
+    Dictionary<string, int> vertexConnectedValidGraphsPerShape;
+    Dictionary<string, int> vertexConnectedValidSubgraphsPerShape;
+    Dictionary<string, int> unconnectedValidGraphsPerShape;
+    Dictionary<string, int> invalidGraphsPerShape;
 
     //TODO: make toggleable using a button, maybe
     public bool autoDisplaySilhouetteCells = true;
@@ -124,6 +136,24 @@ public class TripletBuilder : MonoBehaviour
         edgeConnectedValidSubgraphs = 0;
         vertexConnectedValidGraphs = 0;
         vertexConnectedValidSubgraphs = 0;
+        
+    }
+
+    public void resetResultDictionaries(IEnumerable<FileSystemEntry> shapeEntries)
+    {
+        List<KeyValuePair<string, int>> values = new List<KeyValuePair<string, int>>();
+        foreach (FileSystemEntry shapeEntry in shapeEntries)
+            if(shapeEntry.Extension == ".shape")
+                values.Add(new KeyValuePair<string, int>(shapeEntry.Name, 0));
+        shapeSetsPerShape = new Dictionary<string, int>(values);
+        volumeConnectedValidGraphsPerShape = new Dictionary<string, int>(values);
+        volumeConnectedValidSubgraphsPerShape = new Dictionary<string, int>(values);
+        edgeConnectedValidGraphsPerShape = new Dictionary<string, int>(values);
+        edgeConnectedValidSubgraphsPerShape = new Dictionary<string, int>(values);
+        vertexConnectedValidGraphsPerShape = new Dictionary<string, int>(values);
+        vertexConnectedValidSubgraphsPerShape = new Dictionary<string, int>(values);
+        unconnectedValidGraphsPerShape = new Dictionary<string, int>(values);
+        invalidGraphsPerShape = new Dictionary<string, int>(values);
     }
 
     public void RunTestSet(string dataPath, string savePath)
@@ -138,6 +168,7 @@ public class TripletBuilder : MonoBehaviour
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
         FileSystemEntry[] files = FileBrowserHelpers.GetEntriesInDirectory(dataPath, false);
+        resetResultDictionaries(files);
         int rdegsFront, rdegsSide, rdegsTop;
         bool xmirFront, xmirSide, xmirTop;
         bool ymirFront, ymirSide, ymirTop;
@@ -399,6 +430,8 @@ public class TripletBuilder : MonoBehaviour
                 vertexConnectedValidSubgraphs++;
             else if (unconnectedValidGraphFound)
                 unconnectedValidGraphs++;
+            else
+                invalidGraphs++;
 
             volumeConnectedValidGraphFound = false;
             volumeConnectedValidSubgraphFound = false;
@@ -408,10 +441,26 @@ public class TripletBuilder : MonoBehaviour
             vertexConnectedValidSubgraphFound = false;
             unconnectedValidGraphFound = false;
 
-            //TODO: Up the same values for connectedness and validity levels for each shape in a dict
+            //Up the same values for connectedness and validity levels for each shape in a dict
             foreach(string shapeName in shapesInSet)
             {
-
+                shapeSetsPerShape[shapeName]++;
+                if (volumeConnectedValidGraphFound)
+                    volumeConnectedValidGraphsPerShape[shapeName]++;
+                else if (volumeConnectedValidSubgraphFound)
+                    volumeConnectedValidSubgraphsPerShape[shapeName]++;
+                else if (edgeConnectedValidGraphFound)
+                    edgeConnectedValidGraphsPerShape[shapeName]++;
+                else if (edgeConnectedValidSubgraphFound)
+                    edgeConnectedValidSubgraphsPerShape[shapeName]++;
+                else if (vertexConnectedValidGraphFound)
+                    vertexConnectedValidGraphsPerShape[shapeName]++;
+                else if (vertexConnectedValidSubgraphFound)
+                    vertexConnectedValidSubgraphsPerShape[shapeName]++;
+                else if (unconnectedValidGraphFound)
+                    unconnectedValidGraphsPerShape[shapeName]++;
+                else
+                    invalidGraphsPerShape[shapeName]++;
             }
         }
 
@@ -420,7 +469,7 @@ public class TripletBuilder : MonoBehaviour
         frontCellGrid.LoadFillValueList(frontBackup);
         sideCellGrid.LoadFillValueList(sideBackup);
         topCellGrid.LoadFillValueList(topBackup);
-        Debug.Log($"{shapeSets}:{volumeConnectedValidGraphs}:{volumeConnectedValidSubgraphs}:{edgeConnectedValidGraphs}:{edgeConnectedValidSubgraphs}:{vertexConnectedValidGraphs}:{vertexConnectedValidSubgraphs}");
+        Debug.Log($"{shapeSets}:{volumeConnectedValidGraphs}:{volumeConnectedValidSubgraphs}:{edgeConnectedValidGraphs}:{edgeConnectedValidSubgraphs}:{vertexConnectedValidGraphs}:{vertexConnectedValidSubgraphs}:{unconnectedValidGraphs}:{invalidGraphs}");
     }
 
 
@@ -442,6 +491,7 @@ public class TripletBuilder : MonoBehaviour
         controller.EnableCamControl();
     }
 
+    //Source: https://rosettacode.org/wiki/Combinations_with_repetitions#C#
     private static List<List<T>> GenerateCombinations<T>(List<T> combinationList, int k)
     {
         var combinations = new List<List<T>>();
