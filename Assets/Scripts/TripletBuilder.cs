@@ -146,7 +146,7 @@ public class TripletBuilder : MonoBehaviour
         List<KeyValuePair<string, int>> values = new List<KeyValuePair<string, int>>();
         foreach (FileSystemEntry shapeEntry in shapeEntries)
             if(shapeEntry.Extension == ".shape")
-                values.Add(new KeyValuePair<string, int>(shapeEntry.Name, 0));
+                values.Add(new KeyValuePair<string, int>(shapeEntry.Name.Split(".")[0], 0));
         shapeSetsPerShape = new Dictionary<string, int>(values);
         volumeConnectedValidGraphsPerShape = new Dictionary<string, int>(values);
         volumeConnectedValidSubgraphsPerShape = new Dictionary<string, int>(values);
@@ -200,11 +200,13 @@ public class TripletBuilder : MonoBehaviour
             sideCellGrid.LoadFromFile(new string[] { fileSide.Path });
             topCellGrid.LoadFromFile(new string[] { fileTop.Path });
             shapesInSet = new List<string>();
-            shapesInSet.Add(fileFront.Name);
+
+            //Split so name does not contain extension, technically clears anything after the first dot in the filename
+            shapesInSet.Add(fileFront.Name.Split(".")[0]);
             if(fileFront.Name != fileSide.Name)
-                shapesInSet.Add(fileSide.Name);
+                shapesInSet.Add(fileSide.Name.Split(".")[0]);
             if (fileFront.Name != fileTop.Name && fileSide.Name != fileTop.Name)
-                shapesInSet.Add(fileSide.Name);
+                shapesInSet.Add(fileSide.Name.Split(".")[0]);
 
             rdegsFront = 0;
             xmirFront = xmirSide = xmirTop = false;
@@ -238,7 +240,6 @@ public class TripletBuilder : MonoBehaviour
                                     while (true)
                                     {
                                         //Volume connected
-
                                         if (volumeConnectedValidGraphFound)
                                             break;
                                         graphs = voxelGrid.GetConnectedGraphs();
