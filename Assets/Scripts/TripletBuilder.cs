@@ -171,7 +171,11 @@ public class TripletBuilder : MonoBehaviour
         List<List<Cell.FillValue>> sideBackup = sideCellGrid.GridFillValues();
         List<List<Cell.FillValue>> topBackup = topCellGrid.GridFillValues();
         FileSystemEntry[] files = FileBrowserHelpers.GetEntriesInDirectory(dataPath, false);
-        resetResultDictionaries(files);
+        List<FileSystemEntry> temp = new List<FileSystemEntry>();
+        foreach (FileSystemEntry entry in files)
+            if (entry.Extension == ".shape")
+                temp.Add(entry);
+        resetResultDictionaries(temp);
         int rdegsFront, rdegsSide, rdegsTop;
         bool xmirFront, xmirSide, xmirTop;
         bool ymirFront, ymirSide, ymirTop;
@@ -188,14 +192,15 @@ public class TripletBuilder : MonoBehaviour
         FileSystemEntry fileFront;
         FileSystemEntry fileSide;
         FileSystemEntry fileTop;
-        List<List<FileSystemEntry>> fileCombinationsWithRepetition = GenerateCombinations(new List<FileSystemEntry>(files), 3);
-        foreach (List<FileSystemEntry> combination in fileCombinationsWithRepetition)
-        { 
+        List<List<FileSystemEntry>> fileCombinationsWithRepetition = GenerateCombinations(new List<FileSystemEntry>(temp), 3);
+        fileCombinationsWithRepetition.Sort(SortCombinationsHelper.SortCombinations());
+        List<FileSystemEntry> combination;
+        for (int c = 0; c < fileCombinationsWithRepetition.Count; c++)
+        {
+            combination = fileCombinationsWithRepetition[c];
             fileFront = combination[0];
             fileSide = combination[1];
             fileTop = combination[2];
-            if (fileFront.Extension != ".shape" || fileSide.Extension != ".shape" || fileTop.Extension != ".shape")
-                continue;
             frontCellGrid.LoadFromFile(new string[] { fileFront.Path });
             sideCellGrid.LoadFromFile(new string[] { fileSide.Path });
             topCellGrid.LoadFromFile(new string[] { fileTop.Path });
@@ -489,9 +494,11 @@ public class TripletBuilder : MonoBehaviour
 
         StringBuilder result = new StringBuilder($"involved shapes;count;volume connected graph;volume connected subgraph;edge connected graph;edge connected subgraph;vertex connected graph;vertex connected subgraph;unconnected;invalid{System.Environment.NewLine}", expectedLength);
         result.Append($"all;{shapeSets};{volumeConnectedValidGraphs};{volumeConnectedValidSubgraphs};{edgeConnectedValidGraphs};{edgeConnectedValidSubgraphs};{vertexConnectedValidGraphs};{vertexConnectedValidSubgraphs};{unconnectedValidGraphs};{invalidGraphs}{System.Environment.NewLine}");
+        string name;
         foreach (FileSystemEntry entry in files)
         {
-            result.Append($"{entry.Name};{shapeSetsPerShape[entry.Name]};{volumeConnectedValidGraphsPerShape[entry.Name]};{volumeConnectedValidSubgraphsPerShape[entry.Name]};{edgeConnectedValidGraphsPerShape[entry.Name]};{edgeConnectedValidSubgraphsPerShape[entry.Name]};{vertexConnectedValidGraphsPerShape[entry.Name]};{vertexConnectedValidSubgraphsPerShape[entry.Name]};{unconnectedValidGraphsPerShape[entry.Name]};{invalidGraphsPerShape[entry.Name]}{System.Environment.NewLine}");
+            name = entry.Name.Split(".")[0];
+            result.Append($"{name};{shapeSetsPerShape[name]};{volumeConnectedValidGraphsPerShape[name]};{volumeConnectedValidSubgraphsPerShape[name]};{edgeConnectedValidGraphsPerShape[name]};{edgeConnectedValidSubgraphsPerShape[name]};{vertexConnectedValidGraphsPerShape[name]};{vertexConnectedValidSubgraphsPerShape[name]};{unconnectedValidGraphsPerShape[name]};{invalidGraphsPerShape[name]}{System.Environment.NewLine}");
         }
         string resultString = result.ToString();
         Debug.Log(resultString);
@@ -553,4 +560,35 @@ public class TripletBuilder : MonoBehaviour
         return combinations;
     }
 
+}
+
+public class SortCombinationsHelper : IComparer<List<FileSystemEntry>>
+{
+    int IComparer<List<FileSystemEntry>>.Compare(List<FileSystemEntry> x, List<FileSystemEntry> y)
+    {
+        int shortestListLength;
+        if (x.Count > y.Count)
+            shortestListLength = y.Count;
+        else
+            shortestListLength = x.Count;
+
+        for (int i = 0; i < shortestListLength; i++)
+        {
+            if (x[i].Name != y[i].Name)
+            {
+                return x[i].Name.CompareTo(y[i].Name);
+            }
+        }
+
+        if (x.Count > y.Count)
+            return 1;
+        if (y.Count > x.Count)
+            return -1;
+        return 0;
+    }
+
+    public static IComparer<List<FileSystemEntry>> SortCombinations()
+    {
+        return (IComparer<List<FileSystemEntry>>)new SortCombinationsHelper();
+    }
 }
