@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Clipper2Lib;
+using SimpleFileBrowser;
 
 public class SimpleTripletBuilder
 {
@@ -15,6 +16,8 @@ public class SimpleTripletBuilder
     public string[,,] shapeSilhouettesFront;
     public string[,,] shapeSilhouettesSide;
     public string[,,] shapeSilhouettesTop;
+
+    public int graphCount = 0;//TODO: update this when finding graphs using depth first search
 
     int gridSize;
 
@@ -83,7 +86,7 @@ public class SimpleTripletBuilder
         return result;
     }
 
-    public bool IsValid(int graphId = -1)
+    public bool AreSilhouettesValid(int graphId = -1)
     {
         foreach (SimpleCell cell in frontCellGrid)
             if (!cell.IsValid(graphId))
@@ -99,6 +102,100 @@ public class SimpleTripletBuilder
 
         //Return true if non of the cells had an invalid silhouette
         return true;
+    }
+
+    public void loadShapeFromFile(ref SimpleCell[,] cellGrid, string path)
+    {
+        string serialized = FileBrowserHelpers.ReadTextFromFile(path);
+        List<List<Cell.FillValue>> fillValues = DeserializeGridFillValues(serialized);
+        for (int x = 0; x < gridSize; x++)
+            for (int y = 0; y < gridSize; y++)
+                cellGrid[x, y].fillValue = fillValues[x][y];
+    }
+
+    public void RotateClockWise(ref SimpleCell[,] cellGrid)
+    {
+        Cell.FillValue[,] fillGrid = GridFillValues(cellGrid);
+        for (int x = 0; x < gridSize; x++)
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                Cell.FillValue value = fillGrid[gridSize - 1 - y, x];
+                if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
+                    cellGrid[x, y].fillValue = value;
+                if (value == Cell.FillValue.TopLeft)
+                    cellGrid[x, y].fillValue = Cell.FillValue.TopRight;
+                if (value == Cell.FillValue.TopRight)
+                    cellGrid[x, y].fillValue = Cell.FillValue.BottomRight;
+                if (value == Cell.FillValue.BottomLeft)
+                    cellGrid[x, y].fillValue = Cell.FillValue.TopLeft;
+                if (value == Cell.FillValue.BottomRight)
+                    cellGrid[x, y].fillValue = Cell.FillValue.BottomLeft;
+            }
+        }
+    }
+
+    public void MirrorLeftRight(ref SimpleCell[,] cellGrid)
+    {
+        Cell.FillValue[,] fillGrid = GridFillValues(cellGrid);
+        for (int x = 0; x < gridSize; x++)
+        {
+            for (int y = 0; y < gridSize; y++)
+            {
+                Cell.FillValue value = fillGrid[gridSize - 1 - x, y];
+                if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
+                    cellGrid[x, y].fillValue = value;
+                if (value == Cell.FillValue.TopLeft)
+                    cellGrid[x, y].fillValue = Cell.FillValue.TopRight;
+                if (value == Cell.FillValue.TopRight)
+                    cellGrid[x, y].fillValue = Cell.FillValue.TopLeft;
+                if (value == Cell.FillValue.BottomLeft)
+                    cellGrid[x, y].fillValue = Cell.FillValue.BottomRight;
+                if (value == Cell.FillValue.BottomRight)
+                    cellGrid[x, y].fillValue = Cell.FillValue.BottomLeft;
+            }
+        }
+    }
+
+    public Cell.FillValue[,] GridFillValues(SimpleCell[,] cellGrid){
+        Cell.FillValue[,] fillGrid = new Cell.FillValue[gridSize,gridSize];
+        for (int x = 0; x < gridSize; x++)
+            for (int y = 0; y < gridSize; y++)
+            {
+                fillGrid[x, y] = cellGrid[x, y].fillValue;
+            }
+        return fillGrid;
+    }
+
+    public List<List<Cell.FillValue>> DeserializeGridFillValues(string serialized)
+    {
+        List<List<Cell.FillValue>> result = new List<List<Cell.FillValue>>();
+        List<Cell.FillValue> column;
+        string[] lines = serialized.Split(System.Environment.NewLine);
+        List<string[]> values = new List<string[]>();
+        foreach (string line in lines)
+            values.Add(line.Split(" "));
+        for (int x = 0; x < gridSize; x++)
+        {
+            column = new List<Cell.FillValue>();
+            for (int y = 0; y < gridSize; y++)
+            {
+                if (values[y][x] == "fu")
+                    column.Add(Cell.FillValue.Full);
+                if (values[y][x] == "em")
+                    column.Add(Cell.FillValue.Empty);
+                if (values[y][x] == "tl")
+                    column.Add(Cell.FillValue.TopLeft);
+                if (values[y][x] == "tr")
+                    column.Add(Cell.FillValue.TopRight);
+                if (values[y][x] == "bl")
+                    column.Add(Cell.FillValue.BottomLeft);
+                if (values[y][x] == "br")
+                    column.Add(Cell.FillValue.BottomRight);
+            }
+            result.Add(column);
+        }
+        return result;
     }
 
     //TODO: Write these results to a file and use it for validity checking.

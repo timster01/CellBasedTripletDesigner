@@ -8,7 +8,7 @@ public class SimpleCell
     public SimpleTripletBuilder parent;
     int x, y;
     CellGrid.CellGridAngle CellGridAngle;
-    Cell.FillValue fillValue;
+    public Cell.FillValue fillValue;
 
     public SimpleCell(SimpleTripletBuilder parent, int x, int y, CellGrid.CellGridAngle cellGridAngle)
     {

@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TripetSetTestClickReceiver : ClickReceiver
+public class TripletBatchRunClickReceiver : ClickReceiver
 {
-    public TripletBuilder tripletBuilder;
+    public BatchRunner batchrunner;
 
     public override void OnClick()
     {
-        tripletBuilder.TestSet();
+        batchrunner.StartBatch();
     }
 }
