@@ -228,11 +228,11 @@ public class TripletBuilder : MonoBehaviour
                     rdegsTop = 0;
                     for (int rotTop = 0; rotTop < 4; rotTop++)
                     {
-                        for (int mirFront = 0; mirFront < 3; mirFront++)
+                        for (int mirFront = 0; mirFront < 2; mirFront++)
                         {
-                            for (int mirSide = 0; mirSide < 3; mirSide++)
+                            for (int mirSide = 0; mirSide < 2; mirSide++)
                             {
-                                for (int mirTop = 0; mirTop < 3; mirTop++)
+                                for (int mirTop = 0; mirTop < 2; mirTop++)
                                 {
                                     //filename = $"{fileFront.Name[0]}_r{rdegsFront}{(xmirFront ? "_xmir" : "")}{(ymirFront ? "_ymir" : "")}" +
                                     //    $"{fileSide.Name[0]}_r{rdegsSide}{(xmirSide ? "_xmir" : "")}{(ymirSide ? "_ymir" : "")}"+
@@ -370,60 +370,12 @@ public class TripletBuilder : MonoBehaviour
                                     if (vertexConnectedValidSubgraphFound)
                                         unconnectedValidGraphFound = true;
 
-
-                                    if (!xmirTop && !ymirTop)
-                                    {
-                                        topCellGrid.MirrorLeftRight();
-                                        xmirTop = true;
-                                    }
-                                    if (xmirTop)
-                                    {
-                                        topCellGrid.MirrorLeftRight();
-                                        xmirTop = false;
-                                        topCellGrid.MirrorTopBottom();
-                                        ymirTop = true;
-                                    }
-                                    if (ymirTop)
-                                    {
-                                        topCellGrid.MirrorTopBottom();
-                                        ymirTop = false;
-                                    }
+                                    //Mirrored after first unmirrored cycle and reverses mirroring after the second mirrored cycle
+                                    topCellGrid.MirrorLeftRight();
                                 }
-                                if (!xmirSide && !ymirSide)
-                                {
-                                    sideCellGrid.MirrorLeftRight();
-                                    xmirSide = true;
-                                }
-                                if (xmirSide)
-                                {
-                                    sideCellGrid.MirrorLeftRight();
-                                    xmirSide = false;
-                                    sideCellGrid.MirrorTopBottom();
-                                    ymirSide = true;
-                                }
-                                if (ymirSide)
-                                {
-                                    sideCellGrid.MirrorTopBottom();
-                                    ymirSide = false;
-                                }
+                                sideCellGrid.MirrorLeftRight();
                             }
-                            if (!xmirFront && !ymirFront)
-                            {
-                                frontCellGrid.MirrorLeftRight();
-                                xmirFront = true;
-                            }
-                            if (xmirFront)
-                            {
-                                frontCellGrid.MirrorLeftRight();
-                                xmirFront = false;
-                                frontCellGrid.MirrorTopBottom();
-                                ymirFront = true;
-                            }
-                            if (ymirFront)
-                            {
-                                frontCellGrid.MirrorTopBottom();
-                                ymirFront = false;
-                            }
+                            frontCellGrid.MirrorLeftRight();
                         }
                         topCellGrid.RotateClockWise();
                         rdegsTop += 90;

@@ -3,18 +3,102 @@ using System.Collections.Generic;
 using UnityEngine;
 using Clipper2Lib;
 
-public class SimpleSilhouetteDefine : MonoBehaviour
+public class SimpleTripletBuilder
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public SimpleCell[,] frontCellGrid;
+    public SimpleCell[,] sideCellGrid;
+    public SimpleCell[,] topCellGrid;
+
+    public SimpleVoxel[,,] voxelGrid;
+
+    public string[,,] shapeSilhouettesFront;
+    public string[,,] shapeSilhouettesSide;
+    public string[,,] shapeSilhouettesTop;
+
+    int gridSize;
+
+    public SimpleTripletBuilder(int gridSize = 5)
     {
+        this.gridSize = gridSize;
+        shapeSilhouettesFront = new string[6, 6, 6];
+        shapeSilhouettesSide = new string[6, 6, 6];
+        shapeSilhouettesTop = new string[6, 6, 6];
+        for (int i = 0; i < 6; i++)
+            for (int j = 0; j < 6; j++)
+            {
+                shapeSilhouettesFront[0, i, j] = "Empty";
+                shapeSilhouettesFront[i, 0, j] = "Empty";
+                shapeSilhouettesFront[i, j, 0] = "Empty";
+
+                shapeSilhouettesSide[0, i, j] = "Empty";
+                shapeSilhouettesSide[i, 0, j] = "Empty";
+                shapeSilhouettesSide[i, j, 0] = "Empty";
+
+                shapeSilhouettesTop[0, i, j] = "Empty";
+                shapeSilhouettesTop[i, 0, j] = "Empty";
+                shapeSilhouettesTop[i, j, 0] = "Empty";
+            }
         DefineSilhouetteType();
+        frontCellGrid = new SimpleCell[5, 5];
+        sideCellGrid = new SimpleCell[5, 5];
+        topCellGrid = new SimpleCell[5, 5];
+        for (int i = 0; i < gridSize; i++)
+            for (int j = 0; j < gridSize; j++)
+            {
+                frontCellGrid[i, j] = new SimpleCell(this, i, j, CellGrid.CellGridAngle.Front);
+            }
     }
 
-    // Update is called once per frame
-    void Update()
+    public List<SimpleVoxel> GetVoxelColumnFront(int graphId = -1, int x = 0, int y = 0)
     {
-        
+        List<SimpleVoxel> result = new List<SimpleVoxel>();
+        for (int z = 0; z < gridSize; z++)
+        {
+            if (graphId == -1 || voxelGrid[x, y, z].graphId == graphId)
+                result.Add(voxelGrid[x, y, z]);
+        }
+        return result;
+    }
+
+    public List<SimpleVoxel> GetVoxelColumnSide(int graphId = -1, int z = 0, int y = 0)
+    {
+        List<SimpleVoxel> result = new List<SimpleVoxel>();
+        for (int x = 0; x < gridSize; x++)
+        {
+            if (graphId == -1 || voxelGrid[x, y, z].graphId == graphId)
+                result.Add(voxelGrid[x, y, z]);
+        }
+        return result;
+    }
+
+    public List<SimpleVoxel> GetVoxelColumnTop(int graphId = -1, int x = 0, int z = 0)
+    {
+        List<SimpleVoxel> result = new List<SimpleVoxel>();
+        for (int y = 0; y < gridSize; y++)
+        {
+            if (graphId == -1 || voxelGrid[x, y, z].graphId == graphId)
+                result.Add(voxelGrid[x, y, z]);
+        }
+        return result;
+    }
+
+    public bool IsValid(int graphId = -1)
+    {
+        foreach (SimpleCell cell in frontCellGrid)
+            if (!cell.IsValid(graphId))
+                return false;
+
+        foreach (SimpleCell cell in sideCellGrid)
+            if (!cell.IsValid(graphId))
+                return false;
+
+        foreach (SimpleCell cell in topCellGrid)
+            if (!cell.IsValid(graphId))
+                return false;
+
+        //Return true if non of the cells had an invalid silhouette
+        return true;
     }
 
     //TODO: Write these results to a file and use it for validity checking.
@@ -32,7 +116,7 @@ public class SimpleSilhouetteDefine : MonoBehaviour
                 {
                     string objPath = $"{frontFillValue.ToString()}-{sideFillValue.ToString()}-{topFillValue.ToString()}";
                     mesh = Resources.Load<Mesh>(objPath);
-                    
+
                     if (mesh != null)
                     {
                         polygons = new PathsD();
@@ -81,12 +165,14 @@ public class SimpleSilhouetteDefine : MonoBehaviour
                     }
                     else
                         resultFront = resultSide = resultTop = "Empty";
-                    
 
-                    Debug.Log($"{objPath}:{resultFront}:{resultSide}:{resultTop}");
-                    Debug.Log(polygons[0]);
+
+                    shapeSilhouettesFront[(int)frontFillValue, (int)sideFillValue, (int)topFillValue] = resultFront;
+                    shapeSilhouettesSide[(int)frontFillValue, (int)sideFillValue, (int)topFillValue] = resultSide;
+                    shapeSilhouettesTop[(int)frontFillValue, (int)sideFillValue, (int)topFillValue] = resultTop;
+
                 }
-        
+
     }
 
     public string ReturnSilhouetteShape(PathD polygon)
@@ -114,8 +200,7 @@ public class SimpleSilhouetteDefine : MonoBehaviour
             return "Left";
         if (polygon.Contains(topright) && polygon.Contains(bottomright) && polygon.Contains(middle))
             return "Right";
-        
+
         return "wrong";
     }
-
 }
