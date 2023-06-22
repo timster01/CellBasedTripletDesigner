@@ -504,6 +504,11 @@ public class TripletBuilder : MonoBehaviour
         Debug.Log(resultString);
         FileBrowserHelpers.WriteTextToFile(saveResultPath + "/results.csv", resultString);
         EditorUtility.ClearProgressBar();
+        
+        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
 
