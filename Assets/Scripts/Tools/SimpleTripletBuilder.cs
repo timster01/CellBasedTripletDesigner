@@ -16,6 +16,7 @@ public class SimpleTripletBuilder
     public string[,,] shapeSilhouettesFront;
     public string[,,] shapeSilhouettesSide;
     public string[,,] shapeSilhouettesTop;
+    public VoxelConnectedLevel[,,] connectedLevels;
 
     public int graphCount = 0;//TODO: update this when finding graphs using depth first search
 
@@ -27,6 +28,8 @@ public class SimpleTripletBuilder
         shapeSilhouettesFront = new string[6, 6, 6];
         shapeSilhouettesSide = new string[6, 6, 6];
         shapeSilhouettesTop = new string[6, 6, 6];
+        VoxelConnectedLevel[,,] connectedLevels = new VoxelConnectedLevel[6,6,6];
+        VoxelConnectedLevel emptyLevel = new VoxelConnectedLevel();
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
             {
@@ -41,7 +44,12 @@ public class SimpleTripletBuilder
                 shapeSilhouettesTop[0, i, j] = "Empty";
                 shapeSilhouettesTop[i, 0, j] = "Empty";
                 shapeSilhouettesTop[i, j, 0] = "Empty";
+
+                connectedLevels[0, i, j] = emptyLevel;
+                connectedLevels[i, 0, j] = emptyLevel;
+                connectedLevels[i, j, 0] = emptyLevel;
             }
+        DefineConnectedLevels();
         DefineSilhouetteType();
         frontCellGrid = new SimpleCell[5, 5];
         sideCellGrid = new SimpleCell[5, 5];
@@ -198,8 +206,15 @@ public class SimpleTripletBuilder
         return result;
     }
 
-    //TODO: Write these results to a file and use it for validity checking.
-    //TODO2: Try something similar for connectedness if possible.
+    public void MarkGraphId(SimpleVoxel.ConnectedDegree connectedDegree)
+    {
+        graphCount = 0;
+        foreach (SimpleVoxel voxel in voxelGrid)
+            if (voxel.graphId >= 0)
+                voxel.PropagateDFS(graphCount++, connectedDegree);
+    }
+
+    //TODO: Write these results to a file and use it for validity checking. Possibly unneccesary
     void DefineSilhouetteType()
     {
         Mesh mesh;
@@ -300,4 +315,32 @@ public class SimpleTripletBuilder
 
         return "wrong";
     }
+
+    void DefineConnectedLevels()
+    {
+        Mesh mesh;
+        string resultSide;
+        string resultTop;
+        string resultFront;
+        for (Cell.FillValue frontFillValue = (Cell.FillValue)1; (int)frontFillValue <= 5; frontFillValue++)
+            for (Cell.FillValue sideFillValue = (Cell.FillValue)1; (int)sideFillValue <= 5; sideFillValue++)
+                for (Cell.FillValue topFillValue = (Cell.FillValue)1; (int)topFillValue <= 5; topFillValue++)
+                {
+                    string objPath = $"{frontFillValue.ToString()}-{sideFillValue.ToString()}-{topFillValue.ToString()}";
+                    mesh = Resources.Load<Mesh>(objPath);
+                    VoxelConnectedLevel result;
+                    if (mesh != null)
+                    {
+                        result = new VoxelConnectedLevel(mesh, frontFillValue, sideFillValue, topFillValue);
+                    }
+                    else
+                        result = new VoxelConnectedLevel();
+
+
+                    connectedLevels[(int)frontFillValue, (int)sideFillValue, (int)topFillValue] = result;
+
+                }
+
+    }
+
 }

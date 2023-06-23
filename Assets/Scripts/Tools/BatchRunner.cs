@@ -177,7 +177,7 @@ public class BatchRunner : MonoBehaviour
                                         if (volumeConnectedValidGraphFound)
                                             break;
 
-                                        //TODO: dfs volume graphs
+                                        tripletBuilder.MarkGraphId(SimpleVoxel.ConnectedDegree.volume);
 
                                         if (tripletBuilder.graphCount == 1)
                                         {
@@ -208,7 +208,7 @@ public class BatchRunner : MonoBehaviour
                                         if (edgeConnectedValidGraphFound)
                                             break;
 
-                                        //TODO: dfs edge graphs
+                                        tripletBuilder.MarkGraphId(SimpleVoxel.ConnectedDegree.edge);
 
                                         if (tripletBuilder.graphCount < previousGraphCount)
                                         {
@@ -242,7 +242,7 @@ public class BatchRunner : MonoBehaviour
                                         if (vertexConnectedValidGraphFound)
                                             break;
 
-                                        //TODO: dfs vertex graphs
+                                        tripletBuilder.MarkGraphId(SimpleVoxel.ConnectedDegree.vertex);
 
                                         if (tripletBuilder.graphCount < previousGraphCount)
                                         {
