@@ -18,9 +18,9 @@ public class SimpleTripletBuilder
     public string[,,] shapeSilhouettesTop;
     public VoxelConnectedLevel[,,] connectedLevels;
 
-    public int graphCount = 0;//TODO: update this when finding graphs using depth first search
+    public int graphCount = 0;
 
-    int gridSize;
+    public int gridSize;
 
     public SimpleTripletBuilder(int gridSize = 5)
     {
@@ -28,7 +28,7 @@ public class SimpleTripletBuilder
         shapeSilhouettesFront = new string[6, 6, 6];
         shapeSilhouettesSide = new string[6, 6, 6];
         shapeSilhouettesTop = new string[6, 6, 6];
-        VoxelConnectedLevel[,,] connectedLevels = new VoxelConnectedLevel[6,6,6];
+        connectedLevels = new VoxelConnectedLevel[6,6,6];
         VoxelConnectedLevel emptyLevel = new VoxelConnectedLevel();
         for (int i = 0; i < 6; i++)
             for (int j = 0; j < 6; j++)
@@ -51,14 +51,23 @@ public class SimpleTripletBuilder
             }
         DefineConnectedLevels();
         DefineSilhouetteType();
-        frontCellGrid = new SimpleCell[5, 5];
-        sideCellGrid = new SimpleCell[5, 5];
-        topCellGrid = new SimpleCell[5, 5];
+        frontCellGrid = new SimpleCell[gridSize, gridSize];
+        sideCellGrid = new SimpleCell[gridSize, gridSize];
+        topCellGrid = new SimpleCell[gridSize, gridSize];
         for (int i = 0; i < gridSize; i++)
             for (int j = 0; j < gridSize; j++)
             {
                 frontCellGrid[i, j] = new SimpleCell(this, i, j, CellGrid.CellGridAngle.Front);
+                sideCellGrid[i, j] = new SimpleCell(this, i, j, CellGrid.CellGridAngle.Side);
+                topCellGrid[i, j] = new SimpleCell(this, i, j, CellGrid.CellGridAngle.Top);
             }
+        voxelGrid = new SimpleVoxel[gridSize, gridSize, gridSize];
+        for (int i = 0; i < gridSize; i++)
+            for (int j = 0; j < gridSize; j++)
+                for (int k = 0; k < gridSize; k++)
+                {
+                    voxelGrid[i, j, k] = new SimpleVoxel(this, i, j, k);
+                }
     }
 
     public List<SimpleVoxel> GetVoxelColumnFront(int graphId = -1, int x = 0, int y = 0)
@@ -112,7 +121,7 @@ public class SimpleTripletBuilder
         return true;
     }
 
-    public void loadShapeFromFile(ref SimpleCell[,] cellGrid, string path)
+    public void loadShapeFromFile(SimpleCell[,] cellGrid, string path)
     {
         string serialized = FileBrowserHelpers.ReadTextFromFile(path);
         List<List<Cell.FillValue>> fillValues = DeserializeGridFillValues(serialized);
@@ -121,7 +130,7 @@ public class SimpleTripletBuilder
                 cellGrid[x, y].fillValue = fillValues[x][y];
     }
 
-    public void RotateClockWise(ref SimpleCell[,] cellGrid)
+    public void RotateClockWise(SimpleCell[,] cellGrid)
     {
         Cell.FillValue[,] fillGrid = GridFillValues(cellGrid);
         for (int x = 0; x < gridSize; x++)
@@ -143,7 +152,7 @@ public class SimpleTripletBuilder
         }
     }
 
-    public void MirrorLeftRight(ref SimpleCell[,] cellGrid)
+    public void MirrorLeftRight(SimpleCell[,] cellGrid)
     {
         Cell.FillValue[,] fillGrid = GridFillValues(cellGrid);
         for (int x = 0; x < gridSize; x++)
@@ -210,15 +219,17 @@ public class SimpleTripletBuilder
     {
         graphCount = 0;
         foreach (SimpleVoxel voxel in voxelGrid)
-            if (voxel.graphId >= 0)
-                voxel.PropagateDFS(graphCount++, connectedDegree);
+            voxel.graphId = -1;
+        foreach (SimpleVoxel voxel in voxelGrid)
+            if (voxel.graphId < 0 && !voxel.GetConnectedLevel().empty)
+                graphCount += voxel.PropagateDFS(graphCount, connectedDegree);
     }
 
     //TODO: Write these results to a file and use it for validity checking. Possibly unneccesary
     void DefineSilhouetteType()
     {
         Mesh mesh;
-        PathsD polygons = new PathsD();
+        PathsD polygons;
         string resultSide;
         string resultTop;
         string resultFront;
@@ -319,9 +330,6 @@ public class SimpleTripletBuilder
     void DefineConnectedLevels()
     {
         Mesh mesh;
-        string resultSide;
-        string resultTop;
-        string resultFront;
         for (Cell.FillValue frontFillValue = (Cell.FillValue)1; (int)frontFillValue <= 5; frontFillValue++)
             for (Cell.FillValue sideFillValue = (Cell.FillValue)1; (int)sideFillValue <= 5; sideFillValue++)
                 for (Cell.FillValue topFillValue = (Cell.FillValue)1; (int)topFillValue <= 5; topFillValue++)
@@ -335,10 +343,8 @@ public class SimpleTripletBuilder
                     }
                     else
                         result = new VoxelConnectedLevel();
-
-
+                    
                     connectedLevels[(int)frontFillValue, (int)sideFillValue, (int)topFillValue] = result;
-
                 }
 
     }

@@ -48,6 +48,11 @@ public class BatchRunner : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        EditorUtility.ClearProgressBar();
+    }
+
     public void StartBatch()
     {
         StartCoroutine(GetPaths());
@@ -102,19 +107,15 @@ public class BatchRunner : MonoBehaviour
 
     public void RunBatch()
     {
-        Debug.LogError("Not yet fully implemented");
-        return;
         SimpleTripletBuilder tripletBuilder = new SimpleTripletBuilder(5);
         ResetResultValues();
-        FileSystemEntry[] files = FileBrowserHelpers.GetEntriesInDirectory(datasetPath, false);
-        List<FileSystemEntry> temp = new List<FileSystemEntry>();
-        foreach (FileSystemEntry entry in files)
+        FileSystemEntry[] filesArray = FileBrowserHelpers.GetEntriesInDirectory(datasetPath, false);
+        List<FileSystemEntry> files = new List<FileSystemEntry>();
+        foreach (FileSystemEntry entry in filesArray)
             if (entry.Extension == ".shape")
-                temp.Add(entry);
-        resetResultDictionaries(temp);
+                files.Add(entry);
+        resetResultDictionaries(files);
         int rdegsFront, rdegsSide, rdegsTop;
-        bool xmirFront, xmirSide, xmirTop;
-        bool ymirFront, ymirSide, ymirTop;
         int previousGraphCount;
         bool volumeConnectedValidGraphFound = false;
         bool volumeConnectedValidSubgraphFound = false;
@@ -128,7 +129,7 @@ public class BatchRunner : MonoBehaviour
         FileSystemEntry fileFront;
         FileSystemEntry fileSide;
         FileSystemEntry fileTop;
-        List<List<FileSystemEntry>> fileCombinationsWithRepetition = GenerateCombinations(new List<FileSystemEntry>(temp), 3);
+        List<List<FileSystemEntry>> fileCombinationsWithRepetition = GenerateCombinations(new List<FileSystemEntry>(files), 3);
         fileCombinationsWithRepetition.Sort(SortCombinationsHelper.SortCombinations());
         List<FileSystemEntry> combination;
         for (int c = 0; c < fileCombinationsWithRepetition.Count; c++)
@@ -137,9 +138,9 @@ public class BatchRunner : MonoBehaviour
             fileFront = combination[0];
             fileSide = combination[1];
             fileTop = combination[2];
-            tripletBuilder.loadShapeFromFile(ref tripletBuilder.frontCellGrid,fileFront.Path);
-            tripletBuilder.loadShapeFromFile(ref tripletBuilder.sideCellGrid, fileSide.Path);
-            tripletBuilder.loadShapeFromFile(ref tripletBuilder.topCellGrid, fileTop.Path);
+            tripletBuilder.loadShapeFromFile(tripletBuilder.frontCellGrid,fileFront.Path);
+            tripletBuilder.loadShapeFromFile(tripletBuilder.sideCellGrid, fileSide.Path);
+            tripletBuilder.loadShapeFromFile(tripletBuilder.topCellGrid, fileTop.Path);
             shapesInSet = new List<string>();
 
             //Split so name does not contain extension, technically clears anything after the first dot in the filename
@@ -147,15 +148,13 @@ public class BatchRunner : MonoBehaviour
             if (fileFront.Name != fileSide.Name)
                 shapesInSet.Add(fileSide.Name.Split(".")[0]);
             if (fileFront.Name != fileTop.Name && fileSide.Name != fileTop.Name)
-                shapesInSet.Add(fileSide.Name.Split(".")[0]);
-
-            rdegsFront = 0;
-            xmirFront = xmirSide = xmirTop = false;
-            ymirFront = ymirSide = ymirTop = false;
-
+                shapesInSet.Add(fileTop.Name.Split(".")[0]);
+            
             shapeSets++;
 
             EditorUtility.DisplayProgressBar("Simple Progress Bar", "Doing some work...", shapeSets / (float)fileCombinationsWithRepetition.Count);
+            
+            rdegsFront = 0;
             for (int rotFront = 0; rotFront < 4; rotFront++)
             {
                 rdegsSide = 0;
@@ -173,12 +172,12 @@ public class BatchRunner : MonoBehaviour
                                     //Handle this situation for the current shapeset
                                     while (true)
                                     {
+                                        
                                         //Volume connected
                                         if (volumeConnectedValidGraphFound)
                                             break;
 
                                         tripletBuilder.MarkGraphId(SimpleVoxel.ConnectedDegree.volume);
-
                                         if (tripletBuilder.graphCount == 1)
                                         {
                                             if (tripletBuilder.AreSilhouettesValid())
@@ -209,7 +208,7 @@ public class BatchRunner : MonoBehaviour
                                             break;
 
                                         tripletBuilder.MarkGraphId(SimpleVoxel.ConnectedDegree.edge);
-
+                                        
                                         if (tripletBuilder.graphCount < previousGraphCount)
                                         {
                                             if (tripletBuilder.graphCount == 1)
@@ -302,19 +301,19 @@ public class BatchRunner : MonoBehaviour
                                         unconnectedValidGraphFound = true;
 
                                     //Mirrored after first unmirrored cycle and reverses mirroring after the second mirrored cycle
-                                    tripletBuilder.MirrorLeftRight(ref tripletBuilder.topCellGrid);
+                                    tripletBuilder.MirrorLeftRight(tripletBuilder.topCellGrid);
                                 }
-                                tripletBuilder.MirrorLeftRight(ref tripletBuilder.sideCellGrid);
+                                tripletBuilder.MirrorLeftRight(tripletBuilder.sideCellGrid);
                             }
-                            tripletBuilder.MirrorLeftRight(ref tripletBuilder.frontCellGrid);
+                            tripletBuilder.MirrorLeftRight(tripletBuilder.frontCellGrid);
                         }
-                        tripletBuilder.RotateClockWise(ref tripletBuilder.topCellGrid);
+                        tripletBuilder.RotateClockWise(tripletBuilder.topCellGrid);
                         rdegsTop += 90;
                     }
-                    tripletBuilder.RotateClockWise(ref tripletBuilder.sideCellGrid);
+                    tripletBuilder.RotateClockWise(tripletBuilder.sideCellGrid);
                     rdegsSide += 90;
                 }
-                tripletBuilder.RotateClockWise(ref tripletBuilder.frontCellGrid);
+                tripletBuilder.RotateClockWise(tripletBuilder.frontCellGrid);
                 rdegsFront += 90;
             }
 
@@ -368,7 +367,7 @@ public class BatchRunner : MonoBehaviour
 
 
         //Slight overestimation of string length
-        int expectedLength = Mathf.RoundToInt(Mathf.Pow(shapeSets, 4) * 8);
+        int expectedLength = Mathf.RoundToInt(fileCombinationsWithRepetition.Count * fileCombinationsWithRepetition.Count.ToString().Length * 8);
 
         StringBuilder result = new StringBuilder($"involved shapes;count;volume connected graph;volume connected subgraph;edge connected graph;edge connected subgraph;vertex connected graph;vertex connected subgraph;unconnected;invalid{System.Environment.NewLine}", expectedLength);
         result.Append($"all;{shapeSets};{volumeConnectedValidGraphs};{volumeConnectedValidSubgraphs};{edgeConnectedValidGraphs};{edgeConnectedValidSubgraphs};{vertexConnectedValidGraphs};{vertexConnectedValidSubgraphs};{unconnectedValidGraphs};{invalidGraphs}{System.Environment.NewLine}");
