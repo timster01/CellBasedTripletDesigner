@@ -126,7 +126,7 @@ public class VoxelGrid : MonoBehaviour
             parent.frontCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(i, z);
         }
-        MarkGraphId(GetConnectedGraphs());
+        MarkGraphId(Voxel.ConnectedDegree.volume);
         DisplayCombinedMesh();
     }
 
@@ -142,7 +142,7 @@ public class VoxelGrid : MonoBehaviour
             parent.sideCellGrid.UpdateSilhouetteCell(i, z);
             parent.frontCellGrid.UpdateSilhouetteCell(x, i);
         }
-        MarkGraphId(GetConnectedGraphs());
+        MarkGraphId(Voxel.ConnectedDegree.volume);
         DisplayCombinedMesh();
     }
 
@@ -158,7 +158,7 @@ public class VoxelGrid : MonoBehaviour
             parent.sideCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(x, i);
         }
-        MarkGraphId(GetConnectedGraphs());
+        MarkGraphId(Voxel.ConnectedDegree.volume);
         DisplayCombinedMesh();
     }
 
@@ -173,7 +173,7 @@ public class VoxelGrid : MonoBehaviour
         parent.frontCellGrid.UpdateAllSilhouetteCells();
         parent.sideCellGrid.UpdateAllSilhouetteCells();
         parent.topCellGrid.UpdateAllSilhouetteCells();
-        MarkGraphId(GetConnectedGraphs());
+        MarkGraphId(Voxel.ConnectedDegree.volume);
         DisplayCombinedMesh();
     }
 
@@ -185,80 +185,29 @@ public class VoxelGrid : MonoBehaviour
     public List<List<Voxel>> GetConnectedGraphs(bool volume = true, bool edge = false, bool vertex = false)
     {
         List<List<Voxel>> graphs = new List<List<Voxel>>();
-        bool shouldBreak = false;
-        bool notInAGraph;
-        List<Voxel> graph;
-        bool foundCell;
-        while (true)
+        for (int i = 0; i < nrOfGraphs; i++)
         {
-            graph = new List<Voxel>();
-            foundCell = false;
-            foreach (List<List<Voxel>> plane in grid)
-            {
-                foreach (List<Voxel> column in plane)
-                {
-                    foreach (Voxel voxel in column)
-                    {
-                        notInAGraph = true;
-                        if (voxel.childShape.GetComponent<MeshFilter>().mesh.triangles.Length > 0)
-                        {
-                            foreach (List<Voxel> foundCells in graphs)
-                            {
-                                if (foundCells.Contains(voxel))
-                                {
-                                    notInAGraph = false;
-                                    break;
-                                }
-                            }
-
-                            if (notInAGraph)
-                            {
-                                graph.Add(voxel);
-                                graph.AddRange(voxel.ConnectedVoxels(volume, edge, vertex));
-                                shouldBreak = true;
-                                foundCell = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (shouldBreak)
-                        break;
-                }
-                if (shouldBreak)
-                    break;
-            }
-            shouldBreak = false;
-            if (!foundCell)
-            {
-                break;
-            }
-            int i = 1;
-            while (i < graph.Count)
-            {
-                foreach (Voxel voxel in graph[i].ConnectedVoxels(volume, edge, vertex))
-                {
-                    if (!graph.Contains(voxel))
-                        graph.Add(voxel);
-                }
-                i++;
-            }
-            graphs.Add(graph);
+            graphs.Add(new List<Voxel>());
         }
+        foreach (List<List<Voxel>> plane in grid)
+            foreach (List<Voxel> column in plane)
+                foreach (Voxel voxel in column)
+                    graphs[voxel.graphId].Add(voxel);
         return graphs;
     }
 
-    public void MarkGraphId(List<List<Voxel>> graphs)
+    public void MarkGraphId(Voxel.ConnectedDegree connectedDegree)
     {
-        int i = 0;
-        foreach (List<Voxel> graph in graphs)
-        {
-            foreach (Voxel voxel in graph)
-            {
-                voxel.graphId = i;
-            }
-            i++;
-        }
-        nrOfGraphs = i;
+        nrOfGraphs = 0;
+        foreach(List<List<Voxel>> plane in grid)
+            foreach (List<Voxel> column in plane)
+                foreach (Voxel voxel in column)
+                    voxel.graphId = -1;
+        foreach (List<List<Voxel>> plane in grid)
+            foreach (List<Voxel> column in plane)
+                foreach (Voxel voxel in column)
+                    if (voxel.graphId < 0)
+                        nrOfGraphs += voxel.PropagateDFS(nrOfGraphs, connectedDegree);
     }
 
     public bool IsTripletConnected()

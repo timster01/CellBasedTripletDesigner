@@ -9,6 +9,8 @@ public class Voxel : MonoBehaviour
     public VoxelGrid parent;
     public int graphId;
 
+    public enum ConnectedDegree { volume, edge, vertex };
+
     // Start is called before the first frame update
     void Start()
     {
@@ -262,6 +264,26 @@ public class Voxel : MonoBehaviour
                         }
                     }
         return result;
+    }
+
+    public int PropagateDFS(int propagationGraphId, ConnectedDegree connectedDegree)
+    {
+        Mesh thisMesh = childShape.GetComponent<MeshFilter>().mesh;
+        if (graphId >= 0 || thisMesh == null || thisMesh.vertices.Length == 0)
+            return 0;
+
+        graphId = propagationGraphId;
+        List<Voxel> connectedVoxels;
+        if (connectedDegree == ConnectedDegree.volume)
+            connectedVoxels = VolumeConnectedVoxels();
+        else if (connectedDegree == ConnectedDegree.edge)
+            connectedVoxels = EdgeConnectedVoxels();
+        else
+            connectedVoxels = VertexConnectedVoxels();
+
+        foreach (Voxel voxel in connectedVoxels)
+            voxel.PropagateDFS(propagationGraphId, connectedDegree);
+        return 1;
     }
 
     public void UpdateVoxel()
