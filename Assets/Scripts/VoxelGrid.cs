@@ -16,7 +16,7 @@ public class VoxelGrid : MonoBehaviour
     List<List<List<Voxel>>> grid;
     List<Color> graphColors;
 
-    public int nrOfGraphs = 0;
+    public int graphCount = 0;
     
     
 
@@ -185,7 +185,7 @@ public class VoxelGrid : MonoBehaviour
     public List<List<Voxel>> GetConnectedGraphs(bool volume = true, bool edge = false, bool vertex = false)
     {
         List<List<Voxel>> graphs = new List<List<Voxel>>();
-        for (int i = 0; i < nrOfGraphs; i++)
+        for (int i = 0; i < graphCount; i++)
         {
             graphs.Add(new List<Voxel>());
         }
@@ -198,7 +198,7 @@ public class VoxelGrid : MonoBehaviour
 
     public void MarkGraphId(Voxel.ConnectedDegree connectedDegree)
     {
-        nrOfGraphs = 0;
+        graphCount = 0;
         foreach(List<List<Voxel>> plane in grid)
             foreach (List<Voxel> column in plane)
                 foreach (Voxel voxel in column)
@@ -207,7 +207,7 @@ public class VoxelGrid : MonoBehaviour
             foreach (List<Voxel> column in plane)
                 foreach (Voxel voxel in column)
                     if (voxel.graphId < 0)
-                        nrOfGraphs += voxel.PropagateDFS(nrOfGraphs, connectedDegree);
+                        graphCount += voxel.PropagateDFS(graphCount, connectedDegree);
     }
 
     public bool IsTripletConnected()
