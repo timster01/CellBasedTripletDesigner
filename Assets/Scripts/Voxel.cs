@@ -213,7 +213,9 @@ public class Voxel : MonoBehaviour
         for (int xoffset = -1; xoffset <= 1; xoffset++)
             for (int yoffset = -1; yoffset <= 1; yoffset++)
                 for (int zoffset = -1; zoffset <= 1; zoffset++)
-                    if((xoffset == 0 || yoffset == 0 || zoffset == 0) && ! (xoffset == 0 && yoffset == 0 && zoffset == 0))
+                    if((xoffset == 0 || yoffset == 0 || zoffset == 0) && ! (xoffset == 0 && yoffset == 0 && zoffset == 0) && 
+                        !(x + xoffset < 0 || y + yoffset < 0 || z + zoffset < 0 || 
+                        x + xoffset >= parent.dimension || y + yoffset >= parent.dimension || z + zoffset >= parent.dimension))
                     {
                         offsetVector = new Vector3(xoffset, yoffset, zoffset);
                         currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
@@ -249,7 +251,9 @@ public class Voxel : MonoBehaviour
         for (int xoffset = -1; xoffset <= 1; xoffset++)
             for (int yoffset = -1; yoffset <= 1; yoffset++)
                 for (int zoffset = -1; zoffset <= 1; zoffset++)
-                    if (!(xoffset == 0 && yoffset == 0 && zoffset == 0))
+                    if (!(xoffset == 0 && yoffset == 0 && zoffset == 0) &&
+                        !(x + xoffset < 0 || y + yoffset < 0 || z + zoffset < 0 ||
+                        x + xoffset >= parent.dimension || y + yoffset >= parent.dimension || z + zoffset >= parent.dimension))
                     {
                         offsetVector = new Vector3(xoffset, yoffset, zoffset);
                         currentVoxel = parent.GetVoxelAtCoords(x + xoffset, y + yoffset, z + zoffset);
