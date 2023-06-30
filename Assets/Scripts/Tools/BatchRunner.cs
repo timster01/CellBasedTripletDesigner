@@ -382,6 +382,8 @@ public class BatchRunner : MonoBehaviour
         FileBrowserHelpers.WriteTextToFile(saveResultPath + "/results.csv", resultString);
         EditorUtility.ClearProgressBar();
 
+        Application.OpenURL(saveResultPath + "/results.csv");
+
         Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
