@@ -8,6 +8,6 @@ public class BestOrientationClickReceiver : ClickReceiver
 
     public override void OnClick()
     {
-        Debug.Log(TripletBuilder.FindBestShapeOrientation());
+        TripletBuilder.FindBestShapeOrientation();
     }
 }

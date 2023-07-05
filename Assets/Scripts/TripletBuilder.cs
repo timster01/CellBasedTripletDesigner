@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEditor.UI;
+using TMPro;
 
 public class TripletBuilder : MonoBehaviour
 {
@@ -22,6 +22,8 @@ public class TripletBuilder : MonoBehaviour
     //TODO: make toggleable using a button, maybe
     public bool autoDisplaySilhouetteCells = true;
     public bool autoDisplayCombinedMesh = true;
+
+    public TextMeshPro textField;
 
     // Start is called before the first frame update
     void Start()
@@ -84,7 +86,7 @@ public class TripletBuilder : MonoBehaviour
         test = false;
     }
 
-    public string FindBestShapeOrientation()
+    public void FindBestShapeOrientation()
     {
         int previousGraphCount;
         int rotFrontBest, rotSideBest, rotTopBest, mirFrontBest, mirSideBest, mirTopBest;
@@ -315,31 +317,31 @@ public class TripletBuilder : MonoBehaviour
 
         if (volumeConnectedValidGraphFound)
         {
-            return "volume connected graph";
+            textField.text = "volume connected graph";
         }
         else if (volumeConnectedValidSubgraphFound)
         {
-            return "volume connected subgraph";
+            textField.text = "volume connected subgraph";
         }
         else if (edgeConnectedValidGraphFound)
         {
-            return "edge connected graph";
+            textField.text = "edge connected graph";
         }
         else if (edgeConnectedValidSubgraphFound)
         {
-            return "edge connected subgraph";
+            textField.text = "edge connected subgraph";
         }
         else if (vertexConnectedValidGraphFound)
         {
-            return "vertex connected graph";
+            textField.text = "vertex connected graph";
         }
         else if (vertexConnectedValidSubgraphFound)
         {
-            return "vertex connected subgraph";
+            textField.text = "vertex connected subgraph";
         }
         else
         {
-            return "invalid";
+            textField.text = "invalid";
         }
 
 
