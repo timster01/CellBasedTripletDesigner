@@ -47,12 +47,12 @@ public class BatchRunner : MonoBehaviour
             saveResultPath = "";
         }
     }
-
+#if UNITY_EDITOR
     private void OnDestroy()
     {
         EditorUtility.ClearProgressBar();
     }
-
+#endif
     public void StartBatch()
     {
         StartCoroutine(GetPaths());
@@ -151,9 +151,9 @@ public class BatchRunner : MonoBehaviour
                 shapesInSet.Add(fileTop.Name.Split(".")[0]);
             
             shapeSets++;
-
+#if UNITY_EDITOR
             EditorUtility.DisplayProgressBar("Simple Progress Bar", "Doing some work...", shapeSets / (float)fileCombinationsWithRepetition.Count);
-            
+#endif
             rdegsFront = 0;
             for (int rotFront = 0; rotFront < 4; rotFront++)
             {
@@ -380,7 +380,9 @@ public class BatchRunner : MonoBehaviour
         string resultString = result.ToString();
         Debug.Log(resultString);
         FileBrowserHelpers.WriteTextToFile(saveResultPath + "/results.csv", resultString);
+#if UNITY_EDITOR
         EditorUtility.ClearProgressBar();
+#endif
 
         Application.OpenURL(saveResultPath + "/results.csv");
 

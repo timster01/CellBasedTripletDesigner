@@ -24,6 +24,9 @@ public class CamController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.C)){
             ToggleCameraView();
         }
+        //This does not really belong here
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
     }
 
     public void DisableCamControl()
