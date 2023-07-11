@@ -125,6 +125,11 @@ public class SimpleTripletBuilder
     {
         string serialized = FileBrowserHelpers.ReadTextFromFile(path);
         List<List<Cell.FillValue>> fillValues = DeserializeGridFillValues(serialized);
+        loadShapeFromFillValueGrid(cellGrid, fillValues);
+    }
+
+    public void loadShapeFromFillValueGrid(SimpleCell[,] cellGrid, List<List<Cell.FillValue>> fillValues)
+    {
         for (int x = 0; x < gridSize; x++)
             for (int y = 0; y < gridSize; y++)
                 cellGrid[x, y].fillValue = fillValues[x][y];

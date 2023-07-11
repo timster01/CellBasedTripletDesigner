@@ -25,6 +25,8 @@ public class TripletBuilder : MonoBehaviour
 
     public TextMeshPro textField;
 
+    SimpleTripletBuilder tripletBuilderDuplicate;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -58,6 +60,8 @@ public class TripletBuilder : MonoBehaviour
         VoxelGridObject.transform.localRotation = Quaternion.identity;
         voxelGrid = VoxelGridObject.GetComponent<VoxelGrid>();
         voxelGrid.parent = this;
+
+        tripletBuilderDuplicate = new SimpleTripletBuilder(dimensions);
     }
 
     // Update is called once per frame
@@ -88,6 +92,11 @@ public class TripletBuilder : MonoBehaviour
 
     public void FindBestShapeOrientation()
     {
+        
+        tripletBuilderDuplicate.loadShapeFromFillValueGrid(tripletBuilderDuplicate.frontCellGrid, frontCellGrid.GridFillValues());
+        tripletBuilderDuplicate.loadShapeFromFillValueGrid(tripletBuilderDuplicate.sideCellGrid, sideCellGrid.GridFillValues());
+        tripletBuilderDuplicate.loadShapeFromFillValueGrid(tripletBuilderDuplicate.topCellGrid, topCellGrid.GridFillValues());
+
         int previousGraphCount;
         int rotFrontBest, rotSideBest, rotTopBest, mirFrontBest, mirSideBest, mirTopBest;
         rotFrontBest = rotSideBest = rotTopBest = mirFrontBest = mirSideBest = mirTopBest = 0;
@@ -119,10 +128,10 @@ public class TripletBuilder : MonoBehaviour
                                     if (volumeConnectedValidGraphFound)
                                         break;
 
-                                    this.voxelGrid.MarkGraphId(Voxel.ConnectedDegree.volume);
-                                    if (this.voxelGrid.graphCount == 1)
+                                    tripletBuilderDuplicate.MarkGraphId(SimpleVoxel.ConnectedDegree.volume);
+                                    if (tripletBuilderDuplicate.graphCount == 1)
                                     {
-                                        if (this.AreSilhouettesValid())
+                                        if (tripletBuilderDuplicate.AreSilhouettesValid())
                                         {
                                             volumeConnectedValidGraphFound = true;
                                             rotFrontBest = rotFront;
@@ -136,11 +145,11 @@ public class TripletBuilder : MonoBehaviour
                                     }
                                     if (volumeConnectedValidSubgraphFound)
                                         break;
-                                    if (this.voxelGrid.graphCount > 1)
+                                    if (tripletBuilderDuplicate.graphCount > 1)
                                     {
-                                        for (int i = 0; i < this.voxelGrid.graphCount; i++)
+                                        for (int i = 0; i < tripletBuilderDuplicate.graphCount; i++)
                                         {
-                                            if (this.AreSilhouettesValid(i))
+                                            if (tripletBuilderDuplicate.AreSilhouettesValid(i))
                                             {
                                                 volumeConnectedValidSubgraphFound = true;
                                                 rotFrontBest = rotFront;
@@ -155,19 +164,19 @@ public class TripletBuilder : MonoBehaviour
                                         if (volumeConnectedValidSubgraphFound)
                                             break;
                                     }
-                                    previousGraphCount = this.voxelGrid.graphCount;
+                                    previousGraphCount = tripletBuilderDuplicate.graphCount;
 
                                     //Edge connected
                                     if (edgeConnectedValidGraphFound)
                                         break;
 
-                                    this.voxelGrid.MarkGraphId(Voxel.ConnectedDegree.edge);
+                                    tripletBuilderDuplicate.MarkGraphId(SimpleVoxel.ConnectedDegree.edge);
 
-                                    if (this.voxelGrid.graphCount < previousGraphCount)
+                                    if (tripletBuilderDuplicate.graphCount < previousGraphCount)
                                     {
-                                        if (this.voxelGrid.graphCount == 1)
+                                        if (tripletBuilderDuplicate.graphCount == 1)
                                         {
-                                            if (this.AreSilhouettesValid())
+                                            if (tripletBuilderDuplicate.AreSilhouettesValid())
                                             {
                                                 edgeConnectedValidGraphFound = true;
                                                 rotFrontBest = rotFront;
@@ -181,11 +190,11 @@ public class TripletBuilder : MonoBehaviour
                                         }
                                         if (edgeConnectedValidSubgraphFound)
                                             break;
-                                        if (this.voxelGrid.graphCount > 1)
+                                        if (tripletBuilderDuplicate.graphCount > 1)
                                         {
-                                            for (int i = 0; i < this.voxelGrid.graphCount; i++)
+                                            for (int i = 0; i < tripletBuilderDuplicate.graphCount; i++)
                                             {
-                                                if (this.AreSilhouettesValid(i))
+                                                if (tripletBuilderDuplicate.AreSilhouettesValid(i))
                                                 {
                                                     edgeConnectedValidSubgraphFound = true;
                                                     rotFrontBest = rotFront;
@@ -200,20 +209,20 @@ public class TripletBuilder : MonoBehaviour
                                                     break;
                                             }
                                         }
-                                        previousGraphCount = this.voxelGrid.graphCount;
+                                        previousGraphCount = tripletBuilderDuplicate.graphCount;
                                     }
 
                                     //Vertex connected
                                     if (vertexConnectedValidGraphFound)
                                         break;
 
-                                    this.voxelGrid.MarkGraphId(Voxel.ConnectedDegree.vertex);
+                                    tripletBuilderDuplicate.MarkGraphId(SimpleVoxel.ConnectedDegree.vertex);
 
-                                    if (this.voxelGrid.graphCount < previousGraphCount)
+                                    if (tripletBuilderDuplicate.graphCount < previousGraphCount)
                                     {
-                                        if (this.voxelGrid.graphCount == 1)
+                                        if (tripletBuilderDuplicate.graphCount == 1)
                                         {
-                                            if (this.AreSilhouettesValid())
+                                            if (tripletBuilderDuplicate.AreSilhouettesValid())
                                             {
                                                 vertexConnectedValidGraphFound = true;
                                                 rotFrontBest = rotFront;
@@ -227,11 +236,11 @@ public class TripletBuilder : MonoBehaviour
                                         }
                                         if (vertexConnectedValidSubgraphFound)
                                             break;
-                                        if (this.voxelGrid.graphCount > 1)
+                                        if (tripletBuilderDuplicate.graphCount > 1)
                                         {
-                                            for (int i = 0; i < this.voxelGrid.graphCount; i++)
+                                            for (int i = 0; i < tripletBuilderDuplicate.graphCount; i++)
                                             {
-                                                if (this.AreSilhouettesValid(i))
+                                                if (tripletBuilderDuplicate.AreSilhouettesValid(i))
                                                 {
                                                     vertexConnectedValidSubgraphFound = true;
                                                     rotFrontBest = rotFront;
@@ -252,7 +261,7 @@ public class TripletBuilder : MonoBehaviour
                                     if (unconnectedValidGraphFound)
                                         break;
 
-                                    if (this.voxelGrid.graphCount > 1 && this.AreSilhouettesValid())
+                                    if (tripletBuilderDuplicate.graphCount > 1 && tripletBuilderDuplicate.AreSilhouettesValid())
                                     {
                                         unconnectedValidGraphFound = true;
                                         rotFrontBest = rotFront;
@@ -288,17 +297,17 @@ public class TripletBuilder : MonoBehaviour
                                     unconnectedValidGraphFound = true;
 
                                 //Mirrored after first unmirrored cycle and reverses mirroring after the second mirrored cycle
-                                this.topCellGrid.MirrorLeftRight();
+                                tripletBuilderDuplicate.MirrorLeftRight(tripletBuilderDuplicate.topCellGrid);
                             }
-                            this.sideCellGrid.MirrorLeftRight();
+                            tripletBuilderDuplicate.MirrorLeftRight(tripletBuilderDuplicate.sideCellGrid);
                         }
-                        this.frontCellGrid.MirrorLeftRight();
+                        tripletBuilderDuplicate.MirrorLeftRight(tripletBuilderDuplicate.frontCellGrid);
                     }
-                    this.topCellGrid.RotateClockWise();
+                    tripletBuilderDuplicate.RotateClockWise(tripletBuilderDuplicate.topCellGrid);
                 }
-                this.sideCellGrid.RotateClockWise();
+                tripletBuilderDuplicate.RotateClockWise(tripletBuilderDuplicate.sideCellGrid);
             }
-            this.frontCellGrid.RotateClockWise();
+            tripletBuilderDuplicate.RotateClockWise(tripletBuilderDuplicate.frontCellGrid);
         }
 
         //Orient like best scenario or does nothing if no valid scenario was found since all best values are 0
