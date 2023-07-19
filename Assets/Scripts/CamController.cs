@@ -8,6 +8,7 @@ public class CamController : MonoBehaviour
     public Camera frontCam;
     public Camera sideCam;
     public Camera topCam;
+    public Canvas buttonCanvas;
 
     private bool allCams = true;
     private bool allDisabled = false;
@@ -15,7 +16,20 @@ public class CamController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        AdjustCamToGridDimension();
+    }
+
+    void AdjustCamToGridDimension()
+    {
+        TripletBuilder tripletBuilder = GameObject.FindObjectOfType<TripletBuilder>();
+        frontCam.transform.position = new Vector3((float)(tripletBuilder.dimensions / 2.0f - 1.3f), tripletBuilder.dimensions / 2.0f, -100);
+        frontCam.orthographicSize = (float)tripletBuilder.dimensions / 5f * 2.5f + 0.5f;
+
+        sideCam.transform.position = new Vector3(100, tripletBuilder.dimensions / 2.0f, (float)(tripletBuilder.dimensions / 2.0f - 1.3f));
+        sideCam.orthographicSize = (float)tripletBuilder.dimensions / 5f * 2.5f + 0.5f;
+
+        topCam.transform.position = new Vector3((float)(tripletBuilder.dimensions / 2.0f - 1.3f), 100, tripletBuilder.dimensions / 2.0f);
+        topCam.orthographicSize = (float)tripletBuilder.dimensions / 5f * 2.5f + 0.5f;
     }
 
     // Update is called once per frame
@@ -37,6 +51,7 @@ public class CamController : MonoBehaviour
         topCam.gameObject.GetComponent<SelectorScript>().enabled = false;
         sideCam.gameObject.GetComponent<SelectorScript>().enabled = false;
         frontCam.gameObject.GetComponent<SelectorScript>().enabled = false;
+        buttonCanvas.enabled = false;
     }
 
     public void EnableCamControl()
@@ -46,6 +61,7 @@ public class CamController : MonoBehaviour
         topCam.gameObject.GetComponent<SelectorScript>().enabled = true;
         sideCam.gameObject.GetComponent<SelectorScript>().enabled = true;
         frontCam.gameObject.GetComponent<SelectorScript>().enabled = true;
+        buttonCanvas.enabled = true;
         allDisabled = false;
     }
 

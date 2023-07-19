@@ -9,7 +9,7 @@ public class VoxelGrid : MonoBehaviour
 {
 
     public GameObject VoxelPrefab;
-    public int dimension = 5;
+    public int dimensions = 5;
     public TripletBuilder parent;
     public GameObject combinedMesh;
 
@@ -23,17 +23,18 @@ public class VoxelGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        dimensions = parent.dimensions;
         graphColors = new List<Color>();
         grid = new List<List<List<Voxel>>>();
         GameObject voxelObject;
         Voxel voxel;
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
             List<List<Voxel>> plane = new List<List<Voxel>>();
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
                 List<Voxel> depthColumn = new List<Voxel>();
-                for (int z = 0; z < dimension; z++)
+                for (int z = 0; z < dimensions; z++)
                 {
                     voxelObject = GameObject.Instantiate(VoxelPrefab,  this.transform);
                     voxelObject.transform.localPosition = new Vector3(x, y, z);
@@ -116,12 +117,12 @@ public class VoxelGrid : MonoBehaviour
 
     public void UpdateVoxelColumnX(int z, int y)
     {
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
             grid[x][y][z].UpdateVoxel();
         }
         parent.sideCellGrid.UpdateSilhouetteCell(z, y);
-        for (int i = 0; i < dimension; i++)
+        for (int i = 0; i < dimensions; i++)
         {
             parent.frontCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(i, z);
@@ -132,12 +133,12 @@ public class VoxelGrid : MonoBehaviour
 
     public void UpdateVoxelColumnY(int x, int z)
     {
-        for (int y = 0; y < dimension; y++)
+        for (int y = 0; y < dimensions; y++)
         {
             grid[x][y][z].UpdateVoxel();
         }
         parent.topCellGrid.UpdateSilhouetteCell(x, z);
-        for (int i = 0; i < dimension; i++)
+        for (int i = 0; i < dimensions; i++)
         {
             parent.sideCellGrid.UpdateSilhouetteCell(i, z);
             parent.frontCellGrid.UpdateSilhouetteCell(x, i);
@@ -148,12 +149,12 @@ public class VoxelGrid : MonoBehaviour
 
     public void UpdateVoxelColumnZ(int x, int y)
     {
-        for (int z = 0; z < dimension; z++)
+        for (int z = 0; z < dimensions; z++)
         {
             grid[x][y][z].UpdateVoxel();
         }
         parent.frontCellGrid.UpdateSilhouetteCell(x, y);
-        for (int i = 0; i < dimension; i++)
+        for (int i = 0; i < dimensions; i++)
         {
             parent.sideCellGrid.UpdateSilhouetteCell(i, y);
             parent.topCellGrid.UpdateSilhouetteCell(x, i);
@@ -164,9 +165,9 @@ public class VoxelGrid : MonoBehaviour
 
     public void UpdateAllVoxels()
     {
-        for (int x = 0; x < dimension; x++)
-            for (int y = 0; y < dimension; y++)
-                for (int z = 0; z < dimension; z++)
+        for (int x = 0; x < dimensions; x++)
+            for (int y = 0; y < dimensions; y++)
+                for (int z = 0; z < dimensions; z++)
                 {
                     grid[x][y][z].UpdateVoxel();
                 }
@@ -265,7 +266,7 @@ public class VoxelGrid : MonoBehaviour
     public PathsD FlattenVoxelColumnX(int z, int y, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
@@ -293,7 +294,7 @@ public class VoxelGrid : MonoBehaviour
     public PathsD FlattenVoxelColumnY(int x, int z, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
-        for (int y = 0; y < dimension; y++)
+        for (int y = 0; y < dimensions; y++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
@@ -321,7 +322,7 @@ public class VoxelGrid : MonoBehaviour
     public PathsD FlattenVoxelColumnZ(int x, int y, int graphId = -1)
     {
         List<Mesh> meshes = new List<Mesh>();
-        for (int z = 0; z < dimension; z++)
+        for (int z = 0; z < dimensions; z++)
         {
             if (graphId != -1 && graphId != grid[x][y][z].graphId)
                 continue;
@@ -356,11 +357,11 @@ public class VoxelGrid : MonoBehaviour
 
         List<MeshFilter> meshFilters = new List<MeshFilter>();
         List<Voxel> voxels = new List<Voxel>();
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
-                for (int z = 0; z < dimension; z++)
+                for (int z = 0; z < dimensions; z++)
                 {
                     if(graphId == -1 || graphId == grid[x][y][z].graphId)
                     {
@@ -407,11 +408,11 @@ public class VoxelGrid : MonoBehaviour
     public Mesh CutConnectionFaces(Mesh input, Voxel voxel)
     {
         List<int> newTriangles = new List<int>();
-        bool up = voxel.y != dimension - 1 && voxel.graphId == grid[voxel.x][voxel.y + 1][voxel.z].graphId;
+        bool up = voxel.y != dimensions - 1 && voxel.graphId == grid[voxel.x][voxel.y + 1][voxel.z].graphId;
         bool down = voxel.y != 0 && voxel.graphId == grid[voxel.x][voxel.y - 1][voxel.z].graphId;
         bool left = voxel.x != 0 && voxel.graphId == grid[voxel.x - 1][voxel.y][voxel.z].graphId;
-        bool right = voxel.x != dimension - 1 && voxel.graphId == grid[voxel.x + 1][voxel.y][voxel.z].graphId;
-        bool back = voxel.z != dimension - 1 && voxel.graphId == grid[voxel.x][voxel.y][voxel.z + 1].graphId;
+        bool right = voxel.x != dimensions - 1 && voxel.graphId == grid[voxel.x + 1][voxel.y][voxel.z].graphId;
+        bool back = voxel.z != dimensions - 1 && voxel.graphId == grid[voxel.x][voxel.y][voxel.z + 1].graphId;
         bool front = voxel.z != 0 && voxel.graphId == grid[voxel.x][voxel.y][voxel.z - 1].graphId;
         bool remove;
         for (int i = 0; i < input.triangles.Length; i+=3)
@@ -467,7 +468,7 @@ public class VoxelGrid : MonoBehaviour
     public void DisplayCombinedMesh()
     {
         
-        combinedMesh.transform.localPosition = new Vector3(-dimension - 10, 0, 0);
+        combinedMesh.transform.localPosition = new Vector3(-dimensions - 10, 0, 0);
         combinedMesh.GetComponent<MeshFilter>().mesh.Clear();
         if (!parent.autoDisplayCombinedMesh)
             return;

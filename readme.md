@@ -34,3 +34,9 @@ Buttons next to the 3D trip-let
 Blue floppy icon next to 2D grid - Save the current trip-let to a file
 White floppy with arrow icon next to 2D grid - Load a batch of shapes from a folder and test all combinations, result is written to a file
 Curved arrow - Test all combinations of rotation and mirror operations on the current shapes in the grid and returns the most connected valid result
+
+# Gridsize
+Gridsize can be adjusted. 
+all sizes of files will still work for the tripletbuilder, 
+but can be cut off or in the bottom left corner. 
+The batch runner only handles files of the currently set size and breaks if not all files in the dataset are the current size.

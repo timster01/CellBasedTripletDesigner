@@ -31,6 +31,8 @@ public class BatchRunner : MonoBehaviour
     Dictionary<string, int> unconnectedValidGraphsPerShape;
     Dictionary<string, int> invalidGraphsPerShape;
 
+    public int gridSize = 5;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -107,7 +109,7 @@ public class BatchRunner : MonoBehaviour
 
     public void RunBatch()
     {
-        SimpleTripletBuilder tripletBuilder = new SimpleTripletBuilder(5);
+        SimpleTripletBuilder tripletBuilder = new SimpleTripletBuilder(gridSize);
         ResetResultValues();
         FileSystemEntry[] filesArray = FileBrowserHelpers.GetEntriesInDirectory(datasetPath, false);
         List<FileSystemEntry> files = new List<FileSystemEntry>();

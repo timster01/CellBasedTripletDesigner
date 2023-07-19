@@ -27,8 +27,16 @@ public class TripletBuilder : MonoBehaviour
 
     SimpleTripletBuilder tripletBuilderDuplicate;
 
+    public TextMeshProUGUI gridSizeDisplay;
+    
+
     // Start is called before the first frame update
     void Start()
+    {
+        SetUpTripletBuilder();
+    }
+
+    void SetUpTripletBuilder()
     {
         //xz
         GameObject topCellGridObject = GameObject.Instantiate(cellGridPrefab, this.transform);
@@ -62,6 +70,29 @@ public class TripletBuilder : MonoBehaviour
         voxelGrid.parent = this;
 
         tripletBuilderDuplicate = new SimpleTripletBuilder(dimensions);
+        gridSizeDisplay.text = $"Gridsize: {dimensions}";
+    }
+
+    void DestroyTripletBuilder()
+    {
+        GameObject.Destroy(frontCellGrid.gameObject);
+        GameObject.Destroy(sideCellGrid.gameObject);
+        GameObject.Destroy(topCellGrid.gameObject);
+        GameObject.Destroy(voxelGrid.gameObject);
+    }
+
+    public void GridSizeUp()
+    {
+        DestroyTripletBuilder();
+        dimensions++;
+        SetUpTripletBuilder();
+    }
+
+    public void GridSizeDown()
+    {
+        DestroyTripletBuilder();
+        dimensions--;
+        SetUpTripletBuilder();
     }
 
     // Update is called once per frame

@@ -121,7 +121,7 @@ public class Cell : MonoBehaviour
 
     private bool IsConnectedUp()
     {
-        if (y == parent.dimension - 1)
+        if (y == parent.dimensions - 1)
             return false;
         Cell adjacentCell = parent.GetCellAtCoords(x, y + 1);
         return ((CurrentFillValue == FillValue.Full || CurrentFillValue == FillValue.TopLeft || CurrentFillValue == FillValue.TopRight) && (adjacentCell.CurrentFillValue == FillValue.Full || adjacentCell.CurrentFillValue == FillValue.BottomLeft || adjacentCell.CurrentFillValue == FillValue.BottomRight));
@@ -137,7 +137,7 @@ public class Cell : MonoBehaviour
 
     private bool IsConnectedRight()
     {
-        if (x == parent.dimension - 1)
+        if (x == parent.dimensions - 1)
             return false;
         Cell adjacentCell = parent.GetCellAtCoords(x + 1, y);
         return ((CurrentFillValue == FillValue.Full || CurrentFillValue == FillValue.TopRight || CurrentFillValue == FillValue.BottomRight) && (adjacentCell.CurrentFillValue == FillValue.Full || adjacentCell.CurrentFillValue == FillValue.TopLeft || adjacentCell.CurrentFillValue == FillValue.BottomLeft));

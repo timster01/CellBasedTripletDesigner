@@ -9,7 +9,7 @@ public class CellGrid : MonoBehaviour
 
     public GameObject CellPrefab;
     public GameObject SilhouetteCellPrefab;
-    public int dimension = 5;
+    public int dimensions = 5;
     public TripletBuilder parent;
     public enum CellGridAngle { Front, Side, Top }
     public CellGridAngle cellGridAngle;
@@ -26,6 +26,7 @@ public class CellGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        dimensions = parent.dimensions;
         graphColors = new List<Color>();
         grid = new List<List<Cell>>();
         silhouetteGrid = new List<List<SilhouetteCell>>();
@@ -33,11 +34,11 @@ public class CellGrid : MonoBehaviour
         Cell cell;
         GameObject silhouetteCellObject;
         SilhouetteCell silhouetteCell;
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
             List<Cell> column = new List<Cell>();
             List<SilhouetteCell> silhouetteColumn = new List<SilhouetteCell>();
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
                 cellObject = GameObject.Instantiate(CellPrefab, this.transform);
                 cellObject.transform.localPosition = new Vector3(x, y, 0);
@@ -48,7 +49,7 @@ public class CellGrid : MonoBehaviour
                 cell.parent = this;
                 column.Add(cell);
                 silhouetteCellObject = GameObject.Instantiate(SilhouetteCellPrefab, this.transform);
-                silhouetteCellObject.transform.localPosition = new Vector3(x, y, dimension + 8);
+                silhouetteCellObject.transform.localPosition = new Vector3(x, y, dimensions + 8);
                 silhouetteCellObject.transform.localRotation = Quaternion.identity;
                 silhouetteCell = silhouetteCellObject.GetComponent<SilhouetteCell>();
                 silhouetteCell.x = x;
@@ -59,7 +60,7 @@ public class CellGrid : MonoBehaviour
             grid.Add(column);
             silhouetteGrid.Add(silhouetteColumn);
         }
-        emptyCount = dimension * dimension;
+        emptyCount = dimensions * dimensions;
     }
 
     // Update is called once per frame
@@ -69,7 +70,7 @@ public class CellGrid : MonoBehaviour
 
     public bool IsEmpty()
     {
-        return emptyCount == dimension * dimension;
+        return emptyCount == dimensions * dimensions;
     }
     public Color GetGraphColor(int graphId)
     {
@@ -273,7 +274,7 @@ public class CellGrid : MonoBehaviour
         if (runningBatchOperation)
             return;
 
-        if (emptyCount >= dimension * dimension - 1)
+        if (emptyCount >= dimensions * dimensions - 1)
             parent.voxelGrid.UpdateAllVoxels();
         else if (cellGridAngle == CellGridAngle.Front)
         {
@@ -323,11 +324,11 @@ public class CellGrid : MonoBehaviour
     public string SerializeGridFillValues()
     {
         List<List<Cell.FillValue>> values = GridFillValues();
-        StringBuilder result = new StringBuilder("", dimension*(dimension*3 + System.Environment.NewLine.Length));
+        StringBuilder result = new StringBuilder("", dimensions*(dimensions*3 + System.Environment.NewLine.Length));
         string fillValueString = "";
-        for (int y = 0; y < dimension; y++)
+        for (int y = 0; y < dimensions; y++)
         {
-            for (int x = 0; x < dimension; x++)
+            for (int x = 0; x < dimensions; x++)
             {
                 if (values[x][y] == Cell.FillValue.Full)
                     fillValueString = "fu";
@@ -341,12 +342,12 @@ public class CellGrid : MonoBehaviour
                     fillValueString = "bl";
                 if (values[x][y] == Cell.FillValue.BottomRight)
                     fillValueString = "br";
-                if(x == dimension - 1)
+                if(x == dimensions - 1)
                     result.Append(fillValueString);
                 else
                     result.Append(fillValueString + " ");
             }
-            if(y < dimension - 1)
+            if(y < dimensions - 1)
                 result.Append(System.Environment.NewLine);
         }
         return result.ToString();
@@ -360,10 +361,10 @@ public class CellGrid : MonoBehaviour
         List<string[]> values = new List<string[]>();
         foreach (string line in lines)
             values.Add(line.Split(" "));
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < Mathf.Min(dimensions, values.Count); x++)
         {
             column = new List<Cell.FillValue>();
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < Mathf.Min(dimensions, values.Count); y++)
             {
                 if (values[y][x] == "fu")
                     column.Add(Cell.FillValue.Full);
@@ -385,9 +386,9 @@ public class CellGrid : MonoBehaviour
 
     public void LoadFillValueList(List<List<Cell.FillValue>> list)
     {
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < Mathf.Min(dimensions, list.Count); x++)
         {
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < Mathf.Min(dimensions, list.Count); y++)
             {
                 grid[x][y].CurrentFillValue = list[x][y];
             }
@@ -398,11 +399,11 @@ public class CellGrid : MonoBehaviour
     {
         StartBatchOperation();
         List<List<Cell.FillValue>> fillGrid = GridFillValues();
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
-                Cell.FillValue value = fillGrid[dimension - 1 - y][x];
+                Cell.FillValue value = fillGrid[dimensions - 1 - y][x];
                 if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
                     grid[x][y].CurrentFillValue = value;
                 if (value == Cell.FillValue.TopLeft)
@@ -422,11 +423,11 @@ public class CellGrid : MonoBehaviour
     {
         StartBatchOperation();
         List<List<Cell.FillValue>> fillGrid = GridFillValues();
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
-                Cell.FillValue value = fillGrid[x][dimension - 1 - y];
+                Cell.FillValue value = fillGrid[x][dimensions - 1 - y];
                 if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
                     grid[x][y].CurrentFillValue = value;
                 if (value == Cell.FillValue.TopLeft)
@@ -446,11 +447,11 @@ public class CellGrid : MonoBehaviour
     {
         StartBatchOperation();
         List<List<Cell.FillValue>> fillGrid = GridFillValues();
-        for (int x = 0; x < dimension; x++)
+        for (int x = 0; x < dimensions; x++)
         {
-            for (int y = 0; y < dimension; y++)
+            for (int y = 0; y < dimensions; y++)
             {
-                Cell.FillValue value = fillGrid[dimension - 1 - x][y];
+                Cell.FillValue value = fillGrid[dimensions - 1 - x][y];
                 if (value == Cell.FillValue.Full || value == Cell.FillValue.Empty)
                     grid[x][y].CurrentFillValue = value;
                 if (value == Cell.FillValue.TopLeft)
