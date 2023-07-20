@@ -19,7 +19,7 @@ public class CamController : MonoBehaviour
         AdjustCamToGridDimension();
     }
 
-    void AdjustCamToGridDimension()
+    public void AdjustCamToGridDimension()
     {
         TripletBuilder tripletBuilder = GameObject.FindObjectOfType<TripletBuilder>();
         frontCam.transform.position = new Vector3((float)(tripletBuilder.dimensions / 2.0f - 1.3f), tripletBuilder.dimensions / 2.0f, -100);
