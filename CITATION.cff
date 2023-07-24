@@ -13,6 +13,13 @@ authors:
     email: timroggen@hotmail.nl
     name-particle: Tim
     orcid: 'https://orcid.org/0009-0009-7823-2454'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.8177763
+    description: v1.0.0
+  - type: doi
+    value: 10.5281/zenodo.8177762
+    description: All versions
 repository-code: 'https://github.com/timster01/CellBasedTripletDesigner'
 repository-artifact: >-
   https://github.com/timster01/CellBasedTripletDesigner/releases
